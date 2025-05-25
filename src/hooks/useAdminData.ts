@@ -2,6 +2,9 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
+import { Database } from '@/integrations/supabase/types';
+
+type BookingStatus = Database['public']['Enums']['booking_status'];
 
 export const useAdminProviders = () => {
   return useQuery({
@@ -90,7 +93,7 @@ export const useUpdateBookingStatus = () => {
   return useMutation({
     mutationFn: async ({ id, status, adminNotes }: { 
       id: string; 
-      status: string; 
+      status: BookingStatus; 
       adminNotes?: string;
     }) => {
       const { data, error } = await supabase
