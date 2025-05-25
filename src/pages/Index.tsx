@@ -1,37 +1,24 @@
-
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import Layout from '@/components/Layout';
 import Header from '@/components/Header';
 import { Button } from '@/components/ui/button';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-
-const cities = [
-  { value: 'casablanca', label: 'الدار البيضاء' },
-  { value: 'rabat', label: 'الرباط' },
-  { value: 'sale', label: 'سلا' },
-  { value: 'fes', label: 'فاس' },
-  { value: 'marrakech', label: 'مراكش' }
-];
-
-const services = [
-  { value: 'cleaning', label: 'تنظيف' },
-  { value: 'plumbing', label: 'سباكة' },
-  { value: 'electrical', label: 'كهرباء' },
-  { value: 'repairs', label: 'إصلاحات' },
-  { value: 'painting', label: 'دهان' },
-  { value: 'carpentry', label: 'نجارة' }
-];
+import { useCities } from '@/hooks/useCities';
+import { useServiceTypes } from '@/hooks/useServiceTypes';
 
 const Index = () => {
   const [selectedCity, setSelectedCity] = useState('');
   const [selectedService, setSelectedService] = useState('');
   const navigate = useNavigate();
+  
+  const { data: cities, isLoading: citiesLoading } = useCities();
+  const { data: services, isLoading: servicesLoading } = useServiceTypes();
 
   const handleSearch = () => {
     const params = new URLSearchParams();
-    if (selectedCity) params.append('city', selectedCity);
-    if (selectedService) params.append('service', selectedService);
+    if (selectedCity) params.append('cityId', selectedCity);
+    if (selectedService) params.append('serviceTypeId', selectedService);
     
     navigate(`/providers${params.toString() ? `?${params.toString()}` : ''}`);
   };
@@ -57,14 +44,14 @@ const Index = () => {
                 <label className="block text-sm font-medium text-gray-700 mb-2 text-right">
                   اختر المدينة
                 </label>
-                <Select value={selectedCity} onValueChange={setSelectedCity}>
+                <Select value={selectedCity} onValueChange={setSelectedCity} disabled={citiesLoading}>
                   <SelectTrigger className="w-full text-right">
-                    <SelectValue placeholder="اختر مدينتك" />
+                    <SelectValue placeholder={citiesLoading ? "جاري التحميل..." : "اختر مدينتك"} />
                   </SelectTrigger>
                   <SelectContent>
-                    {cities.map((city) => (
-                      <SelectItem key={city.value} value={city.value}>
-                        {city.label}
+                    {cities?.map((city) => (
+                      <SelectItem key={city.id} value={city.id}>
+                        {city.name}
                       </SelectItem>
                     ))}
                   </SelectContent>
@@ -75,14 +62,14 @@ const Index = () => {
                 <label className="block text-sm font-medium text-gray-700 mb-2 text-right">
                   اختر الخدمة
                 </label>
-                <Select value={selectedService} onValueChange={setSelectedService}>
+                <Select value={selectedService} onValueChange={setSelectedService} disabled={servicesLoading}>
                   <SelectTrigger className="w-full text-right">
-                    <SelectValue placeholder="نوع الخدمة" />
+                    <SelectValue placeholder={servicesLoading ? "جاري التحميل..." : "نوع الخدمة"} />
                   </SelectTrigger>
                   <SelectContent>
-                    {services.map((service) => (
-                      <SelectItem key={service.value} value={service.value}>
-                        {service.label}
+                    {services?.map((service) => (
+                      <SelectItem key={service.id} value={service.id}>
+                        {service.name}
                       </SelectItem>
                     ))}
                   </SelectContent>
@@ -94,6 +81,7 @@ const Index = () => {
               onClick={handleSearch}
               size="lg" 
               className="w-full bg-primary hover:bg-primary/90 text-lg py-3"
+              disabled={citiesLoading || servicesLoading}
             >
               اعرض مقدمي الخدمة
             </Button>

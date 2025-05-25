@@ -9,16 +9,272 @@ export type Json =
 export type Database = {
   public: {
     Tables: {
-      [_ in never]: never
+      admin_audit_logs: {
+        Row: {
+          action: string
+          admin_user_id: string | null
+          created_at: string
+          id: string
+          new_values: Json | null
+          old_values: Json | null
+          record_id: string | null
+          table_name: string
+        }
+        Insert: {
+          action: string
+          admin_user_id?: string | null
+          created_at?: string
+          id?: string
+          new_values?: Json | null
+          old_values?: Json | null
+          record_id?: string | null
+          table_name: string
+        }
+        Update: {
+          action?: string
+          admin_user_id?: string | null
+          created_at?: string
+          id?: string
+          new_values?: Json | null
+          old_values?: Json | null
+          record_id?: string | null
+          table_name?: string
+        }
+        Relationships: []
+      }
+      booking_requests: {
+        Row: {
+          admin_notes: string | null
+          created_at: string
+          description: string | null
+          full_name: string
+          id: string
+          phone: string
+          requested_date: string
+          requested_time: string
+          service_provider_id: string
+          status: Database["public"]["Enums"]["booking_status"]
+          updated_at: string
+          whatsapp: string | null
+        }
+        Insert: {
+          admin_notes?: string | null
+          created_at?: string
+          description?: string | null
+          full_name: string
+          id?: string
+          phone: string
+          requested_date: string
+          requested_time: string
+          service_provider_id: string
+          status?: Database["public"]["Enums"]["booking_status"]
+          updated_at?: string
+          whatsapp?: string | null
+        }
+        Update: {
+          admin_notes?: string | null
+          created_at?: string
+          description?: string | null
+          full_name?: string
+          id?: string
+          phone?: string
+          requested_date?: string
+          requested_time?: string
+          service_provider_id?: string
+          status?: Database["public"]["Enums"]["booking_status"]
+          updated_at?: string
+          whatsapp?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "booking_requests_service_provider_id_fkey"
+            columns: ["service_provider_id"]
+            isOneToOne: false
+            referencedRelation: "service_providers"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      cities: {
+        Row: {
+          created_at: string
+          id: string
+          is_active: boolean
+          name: string
+          name_en: string | null
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          is_active?: boolean
+          name: string
+          name_en?: string | null
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          is_active?: boolean
+          name?: string
+          name_en?: string | null
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      neighborhoods: {
+        Row: {
+          city_id: string
+          created_at: string
+          id: string
+          is_active: boolean
+          name: string
+          updated_at: string
+        }
+        Insert: {
+          city_id: string
+          created_at?: string
+          id?: string
+          is_active?: boolean
+          name: string
+          updated_at?: string
+        }
+        Update: {
+          city_id?: string
+          created_at?: string
+          id?: string
+          is_active?: boolean
+          name?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "neighborhoods_city_id_fkey"
+            columns: ["city_id"]
+            isOneToOne: false
+            referencedRelation: "cities"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      service_providers: {
+        Row: {
+          city_id: string
+          created_at: string
+          experience_description: string | null
+          id: string
+          is_active: boolean
+          is_verified: boolean
+          languages: string[] | null
+          name: string
+          neighborhood_id: string | null
+          phone: string
+          profile_image_url: string | null
+          service_type_id: string
+          updated_at: string
+          whatsapp: string | null
+          working_hours: Json | null
+        }
+        Insert: {
+          city_id: string
+          created_at?: string
+          experience_description?: string | null
+          id?: string
+          is_active?: boolean
+          is_verified?: boolean
+          languages?: string[] | null
+          name: string
+          neighborhood_id?: string | null
+          phone: string
+          profile_image_url?: string | null
+          service_type_id: string
+          updated_at?: string
+          whatsapp?: string | null
+          working_hours?: Json | null
+        }
+        Update: {
+          city_id?: string
+          created_at?: string
+          experience_description?: string | null
+          id?: string
+          is_active?: boolean
+          is_verified?: boolean
+          languages?: string[] | null
+          name?: string
+          neighborhood_id?: string | null
+          phone?: string
+          profile_image_url?: string | null
+          service_type_id?: string
+          updated_at?: string
+          whatsapp?: string | null
+          working_hours?: Json | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "service_providers_city_id_fkey"
+            columns: ["city_id"]
+            isOneToOne: false
+            referencedRelation: "cities"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "service_providers_neighborhood_id_fkey"
+            columns: ["neighborhood_id"]
+            isOneToOne: false
+            referencedRelation: "neighborhoods"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "service_providers_service_type_id_fkey"
+            columns: ["service_type_id"]
+            isOneToOne: false
+            referencedRelation: "service_types"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      service_types: {
+        Row: {
+          created_at: string
+          description: string | null
+          id: string
+          is_active: boolean
+          name: string
+          name_en: string | null
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          description?: string | null
+          id?: string
+          is_active?: boolean
+          name: string
+          name_en?: string | null
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          description?: string | null
+          id?: string
+          is_active?: boolean
+          name?: string
+          name_en?: string | null
+          updated_at?: string
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never
     }
     Functions: {
-      [_ in never]: never
+      is_provider_available_today: {
+        Args: { provider_id: string }
+        Returns: boolean
+      }
     }
     Enums: {
-      [_ in never]: never
+      booking_status: "جديد" | "تم التواصل" | "مكتمل"
     }
     CompositeTypes: {
       [_ in never]: never
@@ -133,6 +389,8 @@ export type CompositeTypes<
 
 export const Constants = {
   public: {
-    Enums: {},
+    Enums: {
+      booking_status: ["جديد", "تم التواصل", "مكتمل"],
+    },
   },
 } as const

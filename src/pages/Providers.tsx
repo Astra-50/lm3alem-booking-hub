@@ -6,100 +6,23 @@ import Header from '@/components/Header';
 import ProviderCard from '@/components/ProviderCard';
 import { Button } from '@/components/ui/button';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-
-// Mock data - in real app this would come from Supabase
-const mockProviders = [
-  {
-    id: '1',
-    name: 'أحمد الصالحي',
-    service: 'تنظيف',
-    city: 'الرباط',
-    neighborhood: 'أكدال',
-    isVerified: true,
-    isAvailableToday: true,
-    image: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=150&h=150&fit=crop&crop=face'
-  },
-  {
-    id: '2',
-    name: 'محمد بن علي',
-    service: 'سباكة',
-    city: 'الدار البيضاء',
-    neighborhood: 'المعاريف',
-    isVerified: true,
-    isAvailableToday: false,
-    image: 'https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=150&h=150&fit=crop&crop=face'
-  },
-  {
-    id: '3',
-    name: 'فاطمة الزهراء',
-    service: 'تنظيف',
-    city: 'سلا',
-    neighborhood: 'بطانة',
-    isVerified: true,
-    isAvailableToday: true,
-    image: 'https://images.unsplash.com/photo-1494790108755-2616b612b47c?w=150&h=150&fit=crop&crop=face'
-  },
-  {
-    id: '4',
-    name: 'يوسف الكريمي',
-    service: 'كهرباء',
-    city: 'الرباط',
-    neighborhood: 'حسان',
-    isVerified: false,
-    isAvailableToday: true
-  }
-];
-
-const cities = [
-  { value: '', label: 'جميع المدن' },
-  { value: 'casablanca', label: 'الدار البيضاء' },
-  { value: 'rabat', label: 'الرباط' },
-  { value: 'sale', label: 'سلا' }
-];
-
-const services = [
-  { value: '', label: 'جميع الخدمات' },
-  { value: 'cleaning', label: 'تنظيف' },
-  { value: 'plumbing', label: 'سباكة' },
-  { value: 'electrical', label: 'كهرباء' },
-  { value: 'repairs', label: 'إصلاحات' }
-];
+import { useCities } from '@/hooks/useCities';
+import { useServiceTypes } from '@/hooks/useServiceTypes';
+import { useProviders } from '@/hooks/useProviders';
 
 const Providers = () => {
   const [searchParams, setSearchParams] = useSearchParams();
-  const [filteredProviders, setFilteredProviders] = useState(mockProviders);
-  const [cityFilter, setCityFilter] = useState(searchParams.get('city') || '');
-  const [serviceFilter, setServiceFilter] = useState(searchParams.get('service') || '');
+  const [cityFilter, setCityFilter] = useState(searchParams.get('cityId') || '');
+  const [serviceFilter, setServiceFilter] = useState(searchParams.get('serviceTypeId') || '');
 
-  useEffect(() => {
-    let filtered = mockProviders;
-    
-    if (cityFilter) {
-      filtered = filtered.filter(provider => 
-        provider.city.includes(getCityNameByValue(cityFilter))
-      );
-    }
-    
-    if (serviceFilter) {
-      filtered = filtered.filter(provider => 
-        provider.service.includes(getServiceNameByValue(serviceFilter))
-      );
-    }
-    
-    setFilteredProviders(filtered);
-  }, [cityFilter, serviceFilter]);
+  const { data: cities } = useCities();
+  const { data: services } = useServiceTypes();
+  const { data: providers, isLoading, error } = useProviders({
+    cityId: cityFilter || undefined,
+    serviceTypeId: serviceFilter || undefined,
+  });
 
-  const getCityNameByValue = (value: string) => {
-    const city = cities.find(c => c.value === value);
-    return city ? city.label : '';
-  };
-
-  const getServiceNameByValue = (value: string) => {
-    const service = services.find(s => s.value === value);
-    return service ? service.label : '';
-  };
-
-  const handleFilterChange = (type: 'city' | 'service', value: string) => {
+  const handleFilterChange = (type: 'cityId' | 'serviceTypeId', value: string) => {
     const params = new URLSearchParams(searchParams);
     
     if (value) {
@@ -110,12 +33,34 @@ const Providers = () => {
     
     setSearchParams(params);
     
-    if (type === 'city') {
+    if (type === 'cityId') {
       setCityFilter(value);
     } else {
       setServiceFilter(value);
     }
   };
+
+  const clearFilters = () => {
+    setCityFilter('');
+    setServiceFilter('');
+    setSearchParams({});
+  };
+
+  if (error) {
+    return (
+      <Layout>
+        <Header />
+        <div className="py-8">
+          <div className="text-center">
+            <p className="text-red-500">حدث خطأ في تحميل البيانات</p>
+            <Button onClick={() => window.location.reload()} className="mt-4">
+              إعادة المحاولة
+            </Button>
+          </div>
+        </div>
+      </Layout>
+    );
+  }
 
   return (
     <Layout>
@@ -126,32 +71,34 @@ const Providers = () => {
           <div>
             <h1 className="text-3xl font-bold text-gray-900 mb-2">مقدمو الخدمات</h1>
             <p className="text-gray-600">
-              تم العثور على {filteredProviders.length} مقدم خدمة
+              {isLoading ? 'جاري البحث...' : `تم العثور على ${providers?.length || 0} مقدم خدمة`}
             </p>
           </div>
           
           <div className="flex flex-col sm:flex-row gap-4 mt-4 lg:mt-0">
-            <Select value={cityFilter} onValueChange={(value) => handleFilterChange('city', value)}>
+            <Select value={cityFilter} onValueChange={(value) => handleFilterChange('cityId', value)}>
               <SelectTrigger className="w-full sm:w-48">
                 <SelectValue placeholder="فلترة حسب المدينة" />
               </SelectTrigger>
               <SelectContent>
-                {cities.map((city) => (
-                  <SelectItem key={city.value} value={city.value}>
-                    {city.label}
+                <SelectItem value="">جميع المدن</SelectItem>
+                {cities?.map((city) => (
+                  <SelectItem key={city.id} value={city.id}>
+                    {city.name}
                   </SelectItem>
                 ))}
               </SelectContent>
             </Select>
             
-            <Select value={serviceFilter} onValueChange={(value) => handleFilterChange('service', value)}>
+            <Select value={serviceFilter} onValueChange={(value) => handleFilterChange('serviceTypeId', value)}>
               <SelectTrigger className="w-full sm:w-48">
                 <SelectValue placeholder="فلترة حسب الخدمة" />
               </SelectTrigger>
               <SelectContent>
-                {services.map((service) => (
-                  <SelectItem key={service.value} value={service.value}>
-                    {service.label}
+                <SelectItem value="">جميع الخدمات</SelectItem>
+                {services?.map((service) => (
+                  <SelectItem key={service.id} value={service.id}>
+                    {service.name}
                   </SelectItem>
                 ))}
               </SelectContent>
@@ -159,19 +106,30 @@ const Providers = () => {
           </div>
         </div>
         
-        {filteredProviders.length > 0 ? (
+        {isLoading ? (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {filteredProviders.map((provider) => (
+            {[...Array(6)].map((_, i) => (
+              <div key={i} className="bg-white rounded-lg shadow-md p-6 animate-pulse">
+                <div className="w-20 h-20 bg-gray-200 rounded-full mx-auto mb-4"></div>
+                <div className="h-4 bg-gray-200 rounded mb-2"></div>
+                <div className="h-3 bg-gray-200 rounded mb-4"></div>
+                <div className="h-8 bg-gray-200 rounded"></div>
+              </div>
+            ))}
+          </div>
+        ) : providers && providers.length > 0 ? (
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            {providers.map((provider) => (
               <ProviderCard
                 key={provider.id}
                 id={provider.id}
                 name={provider.name}
-                service={provider.service}
-                city={provider.city}
-                neighborhood={provider.neighborhood}
-                isVerified={provider.isVerified}
-                isAvailableToday={provider.isAvailableToday}
-                image={provider.image}
+                service={provider.service_types?.name || ''}
+                city={provider.cities?.name || ''}
+                neighborhood={provider.neighborhoods?.name || ''}
+                isVerified={provider.is_verified}
+                isAvailableToday={true} // We'll calculate this later
+                image={provider.profile_image_url}
               />
             ))}
           </div>
@@ -181,11 +139,7 @@ const Providers = () => {
             <Button 
               variant="outline" 
               className="mt-4"
-              onClick={() => {
-                setCityFilter('');
-                setServiceFilter('');
-                setSearchParams({});
-              }}
+              onClick={clearFilters}
             >
               إزالة الفلاتر
             </Button>

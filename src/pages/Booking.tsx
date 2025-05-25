@@ -9,11 +9,16 @@ import { Textarea } from '@/components/ui/textarea';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Label } from '@/components/ui/label';
 import { useToast } from '@/hooks/use-toast';
+import { useProvider } from '@/hooks/useProviders';
+import { useCreateBooking } from '@/hooks/useBooking';
 
 const Booking = () => {
-  const { providerId } = useParams();
+  const { providerId } = useParams<{ providerId: string }>();
   const navigate = useNavigate();
   const { toast } = useToast();
+  
+  const { data: provider, isLoading: providerLoading } = useProvider(providerId!);
+  const createBookingMutation = useCreateBooking();
   
   const [formData, setFormData] = useState({
     fullName: '',
@@ -24,7 +29,7 @@ const Booking = () => {
     description: ''
   });
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     
     // Validation
@@ -37,20 +42,91 @@ const Booking = () => {
       return;
     }
 
-    // In real app, this would submit to Supabase
-    console.log('Booking submitted:', { ...formData, providerId });
-    
-    toast({
-      title: "تم إرسال الطلب",
-      description: "سيتم التواصل معك قريباً",
-    });
-    
-    navigate('/confirmation');
+    if (!providerId) {
+      toast({
+        title: "خطأ",
+        description: "معرف مقدم الخدمة غير صحيح",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    try {
+      await createBookingMutation.mutateAsync({
+        full_name: formData.fullName,
+        phone: formData.phone,
+        whatsapp: formData.whatsapp || undefined,
+        requested_date: formData.date,
+        requested_time: formData.time,
+        description: formData.description || undefined,
+        service_provider_id: providerId,
+      });
+      
+      toast({
+        title: "تم إرسال الطلب",
+        description: "سيتم التواصل معك قريباً",
+      });
+      
+      navigate('/confirmation', { 
+        state: { 
+          providerName: provider?.name,
+          providerPhone: provider?.whatsapp || provider?.phone 
+        } 
+      });
+    } catch (error) {
+      console.error('Booking error:', error);
+      toast({
+        title: "خطأ",
+        description: "حدث خطأ في إرسال الطلب. يرجى المحاولة مرة أخرى",
+        variant: "destructive",
+      });
+    }
   };
 
   const handleChange = (field: string, value: string) => {
     setFormData(prev => ({ ...prev, [field]: value }));
   };
+
+  if (providerLoading) {
+    return (
+      <Layout>
+        <Header />
+        <div className="py-8">
+          <div className="max-w-2xl mx-auto">
+            <Card>
+              <CardContent className="p-8">
+                <div className="animate-pulse">
+                  <div className="h-6 bg-gray-200 rounded mb-4"></div>
+                  <div className="h-4 bg-gray-200 rounded mb-8"></div>
+                  <div className="space-y-4">
+                    {[...Array(6)].map((_, i) => (
+                      <div key={i} className="h-12 bg-gray-200 rounded"></div>
+                    ))}
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+          </div>
+        </div>
+      </Layout>
+    );
+  }
+
+  if (!provider) {
+    return (
+      <Layout>
+        <Header />
+        <div className="py-8">
+          <div className="max-w-2xl mx-auto text-center">
+            <p className="text-red-500 mb-4">لم يتم العثور على مقدم الخدمة</p>
+            <Button onClick={() => navigate('/providers')}>
+              العودة إلى قائمة مقدمي الخدمات
+            </Button>
+          </div>
+        </div>
+      </Layout>
+    );
+  }
 
   return (
     <Layout>
@@ -62,7 +138,7 @@ const Booking = () => {
             <CardHeader>
               <CardTitle className="text-2xl text-center">احجز الخدمة</CardTitle>
               <p className="text-center text-gray-600">
-                أكمل النموذج وسيتواصل معك مقدم الخدمة قريباً
+                أكمل النموذج وسيتواصل معك {provider.name} قريباً
               </p>
             </CardHeader>
             
@@ -80,6 +156,7 @@ const Booking = () => {
                     placeholder="أدخل اسمك الكامل"
                     className="text-right"
                     required
+                    disabled={createBookingMutation.isPending}
                   />
                 </div>
                 
@@ -96,6 +173,7 @@ const Booking = () => {
                     placeholder="0612345678"
                     className="text-right"
                     required
+                    disabled={createBookingMutation.isPending}
                   />
                 </div>
                 
@@ -111,6 +189,7 @@ const Booking = () => {
                     onChange={(e) => handleChange('whatsapp', e.target.value)}
                     placeholder="0612345678"
                     className="text-right"
+                    disabled={createBookingMutation.isPending}
                   />
                 </div>
                 
@@ -127,6 +206,8 @@ const Booking = () => {
                       onChange={(e) => handleChange('date', e.target.value)}
                       className="text-right"
                       required
+                      disabled={createBookingMutation.isPending}
+                      min={new Date().toISOString().split('T')[0]}
                     />
                   </div>
                   
@@ -141,6 +222,7 @@ const Booking = () => {
                       onChange={(e) => handleChange('time', e.target.value)}
                       className="text-right"
                       required
+                      disabled={createBookingMutation.isPending}
                     />
                   </div>
                 </div>
@@ -157,6 +239,7 @@ const Booking = () => {
                     placeholder="صف العمل الذي تحتاجه بالتفصيل..."
                     className="text-right min-h-[100px]"
                     rows={4}
+                    disabled={createBookingMutation.isPending}
                   />
                 </div>
                 
@@ -164,8 +247,9 @@ const Booking = () => {
                 <Button 
                   type="submit" 
                   className="w-full bg-primary hover:bg-primary/90 text-lg py-3"
+                  disabled={createBookingMutation.isPending}
                 >
-                  إرسال طلب الحجز
+                  {createBookingMutation.isPending ? 'جاري الإرسال...' : 'إرسال طلب الحجز'}
                 </Button>
                 
                 <p className="text-sm text-gray-600 text-center">
