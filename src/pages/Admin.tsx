@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import Layout from '@/components/Layout';
 import { Button } from '@/components/ui/button';
@@ -30,6 +29,9 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select';
+import { Database } from '@/integrations/supabase/types';
+
+type BookingStatus = Database['public']['Enums']['booking_status'];
 
 const Admin = () => {
   const { user, signOut } = useAuth();
@@ -41,7 +43,7 @@ const Admin = () => {
   const { toast } = useToast();
 
   const [selectedBooking, setSelectedBooking] = useState<any>(null);
-  const [newStatus, setNewStatus] = useState('');
+  const [newStatus, setNewStatus] = useState<BookingStatus>('جديد');
   const [adminNotes, setAdminNotes] = useState('');
 
   if (adminLoading) {
@@ -89,7 +91,7 @@ const Admin = () => {
     });
 
     setSelectedBooking(null);
-    setNewStatus('');
+    setNewStatus('جديد');
     setAdminNotes('');
   };
 
@@ -230,7 +232,7 @@ const Admin = () => {
                               variant="outline"
                               onClick={() => {
                                 setSelectedBooking(booking);
-                                setNewStatus(booking.status);
+                                setNewStatus(booking.status as BookingStatus);
                                 setAdminNotes(booking.admin_notes || '');
                               }}
                             >
@@ -244,7 +246,7 @@ const Admin = () => {
                             <div className="space-y-4">
                               <div>
                                 <label className="text-sm font-medium">الحالة الجديدة</label>
-                                <Select value={newStatus} onValueChange={setNewStatus}>
+                                <Select value={newStatus} onValueChange={(value: BookingStatus) => setNewStatus(value)}>
                                   <SelectTrigger>
                                     <SelectValue />
                                   </SelectTrigger>
@@ -252,7 +254,6 @@ const Admin = () => {
                                     <SelectItem value="جديد">جديد</SelectItem>
                                     <SelectItem value="تم التواصل">تم التواصل</SelectItem>
                                     <SelectItem value="مكتمل">مكتمل</SelectItem>
-                                    <SelectItem value="ملغي">ملغي</SelectItem>
                                   </SelectContent>
                                 </Select>
                               </div>
