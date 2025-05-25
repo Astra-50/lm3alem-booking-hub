@@ -263,17 +263,56 @@ export type Database = {
         }
         Relationships: []
       }
+      user_roles: {
+        Row: {
+          created_at: string
+          id: string
+          role: Database["public"]["Enums"]["app_role"]
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          role: Database["public"]["Enums"]["app_role"]
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          role?: Database["public"]["Enums"]["app_role"]
+          user_id?: string
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never
     }
     Functions: {
+      create_audit_log: {
+        Args: {
+          _action: string
+          _table_name: string
+          _record_id: string
+          _old_values?: Json
+          _new_values?: Json
+        }
+        Returns: undefined
+      }
+      has_role: {
+        Args: {
+          _user_id: string
+          _role: Database["public"]["Enums"]["app_role"]
+        }
+        Returns: boolean
+      }
       is_provider_available_today: {
         Args: { provider_id: string }
         Returns: boolean
       }
     }
     Enums: {
+      app_role: "admin" | "user"
       booking_status: "جديد" | "تم التواصل" | "مكتمل"
     }
     CompositeTypes: {
@@ -390,6 +429,7 @@ export type CompositeTypes<
 export const Constants = {
   public: {
     Enums: {
+      app_role: ["admin", "user"],
       booking_status: ["جديد", "تم التواصل", "مكتمل"],
     },
   },
