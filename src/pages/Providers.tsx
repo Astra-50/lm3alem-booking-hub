@@ -12,20 +12,20 @@ import { useProviders } from '@/hooks/useProviders';
 
 const Providers = () => {
   const [searchParams, setSearchParams] = useSearchParams();
-  const [cityFilter, setCityFilter] = useState(searchParams.get('cityId') || '');
-  const [serviceFilter, setServiceFilter] = useState(searchParams.get('serviceTypeId') || '');
+  const [cityFilter, setCityFilter] = useState(searchParams.get('cityId') || 'all-cities');
+  const [serviceFilter, setServiceFilter] = useState(searchParams.get('serviceTypeId') || 'all-services');
 
   const { data: cities } = useCities();
   const { data: services } = useServiceTypes();
   const { data: providers, isLoading, error } = useProviders({
-    cityId: cityFilter || undefined,
-    serviceTypeId: serviceFilter || undefined,
+    cityId: cityFilter !== 'all-cities' ? cityFilter : undefined,
+    serviceTypeId: serviceFilter !== 'all-services' ? serviceFilter : undefined,
   });
 
   const handleFilterChange = (type: 'cityId' | 'serviceTypeId', value: string) => {
     const params = new URLSearchParams(searchParams);
     
-    if (value) {
+    if (value && value !== 'all-cities' && value !== 'all-services') {
       params.set(type, value);
     } else {
       params.delete(type);
@@ -41,8 +41,8 @@ const Providers = () => {
   };
 
   const clearFilters = () => {
-    setCityFilter('');
-    setServiceFilter('');
+    setCityFilter('all-cities');
+    setServiceFilter('all-services');
     setSearchParams({});
   };
 
@@ -81,7 +81,7 @@ const Providers = () => {
                 <SelectValue placeholder="فلترة حسب المدينة" />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="">جميع المدن</SelectItem>
+                <SelectItem value="all-cities">جميع المدن</SelectItem>
                 {cities?.map((city) => (
                   <SelectItem key={city.id} value={city.id}>
                     {city.name}
@@ -95,7 +95,7 @@ const Providers = () => {
                 <SelectValue placeholder="فلترة حسب الخدمة" />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="">جميع الخدمات</SelectItem>
+                <SelectItem value="all-services">جميع الخدمات</SelectItem>
                 {services?.map((service) => (
                   <SelectItem key={service.id} value={service.id}>
                     {service.name}
