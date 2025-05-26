@@ -8,6 +8,7 @@ import { Badge } from '@/components/ui/badge';
 import { useToast } from '@/hooks/use-toast';
 import { useCities } from '@/hooks/useCities';
 import { useServiceTypes } from '@/hooks/useServiceTypes';
+import { X, Plus, Upload } from 'lucide-react';
 import {
   Select,
   SelectContent,
@@ -61,6 +62,14 @@ const dayNames = {
   sunday: 'الأحد'
 };
 
+const commonLanguages = [
+  'العربية',
+  'الفرنسية',
+  'الإنجليزية',
+  'الأمازيغية',
+  'الإسبانية'
+];
+
 const AddProviderForm = () => {
   const [isOpen, setIsOpen] = useState(false);
   const [formData, setFormData] = useState({
@@ -75,6 +84,10 @@ const AddProviderForm = () => {
   });
   const [workingHours, setWorkingHours] = useState<WorkingHours>(defaultWorkingHours);
   const [neighborhoods, setNeighborhoods] = useState<any[]>([]);
+  const [profileImage, setProfileImage] = useState<File | null>(null);
+  const [imagePreview, setImagePreview] = useState<string>('');
+  const [isUploading, setIsUploading] = useState(false);
+  const [newLanguage, setNewLanguage] = useState('');
   
   const { data: cities } = useCities();
   const { data: serviceTypes } = useServiceTypes();
@@ -98,11 +111,46 @@ const AddProviderForm = () => {
     setNeighborhoods(data || []);
   };
 
+  const uploadImage = async (file: File): Promise<string> => {
+    const fileExt = file.name.split('.').pop();
+    const fileName = `${Math.random().toString(36).substring(2)}.${fileExt}`;
+    const filePath = `provider-images/${fileName}`;
+
+    const { error: uploadError } = await supabase.storage
+      .from('provider-images')
+      .upload(filePath, file);
+
+    if (uploadError) throw uploadError;
+
+    const { data: { publicUrl } } = supabase.storage
+      .from('provider-images')
+      .getPublicUrl(filePath);
+
+    return publicUrl;
+  };
+
   const createProvider = useMutation({
     mutationFn: async (data: any) => {
+      let profileImageUrl = null;
+      
+      if (profileImage) {
+        setIsUploading(true);
+        try {
+          profileImageUrl = await uploadImage(profileImage);
+        } catch (error) {
+          throw new Error('فشل في رفع الصورة');
+        }
+        setIsUploading(false);
+      }
+
+      const providerData = {
+        ...data,
+        profile_image_url: profileImageUrl
+      };
+
       const { data: result, error } = await supabase
         .from('service_providers')
-        .insert([data])
+        .insert([providerData])
         .select()
         .single();
       
@@ -111,6 +159,7 @@ const AddProviderForm = () => {
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['admin-providers'] });
+      queryClient.invalidateQueries({ queryKey: ['providers'] });
       toast({
         title: "تم إضافة مقدم الخدمة بنجاح",
         description: "تم إنشاء مقدم خدمة جديد",
@@ -122,9 +171,10 @@ const AddProviderForm = () => {
       console.error('Error creating provider:', error);
       toast({
         title: "خطأ",
-        description: "فشل في إضافة مقدم الخدمة",
+        description: error.message || "فشل في إضافة مقدم الخدمة",
         variant: "destructive",
       });
+      setIsUploading(false);
     },
   });
 
@@ -141,6 +191,9 @@ const AddProviderForm = () => {
     });
     setWorkingHours(defaultWorkingHours);
     setNeighborhoods([]);
+    setProfileImage(null);
+    setImagePreview('');
+    setNewLanguage('');
   };
 
   const handleCityChange = (cityId: string) => {
@@ -156,6 +209,35 @@ const AddProviderForm = () => {
         [field]: value
       }
     }));
+  };
+
+  const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (file) {
+      setProfileImage(file);
+      const reader = new FileReader();
+      reader.onloadend = () => {
+        setImagePreview(reader.result as string);
+      };
+      reader.readAsDataURL(file);
+    }
+  };
+
+  const removeLanguage = (languageToRemove: string) => {
+    setFormData({
+      ...formData,
+      languages: formData.languages.filter(lang => lang !== languageToRemove)
+    });
+  };
+
+  const addLanguage = (language: string) => {
+    if (language && !formData.languages.includes(language)) {
+      setFormData({
+        ...formData,
+        languages: [...formData.languages, language]
+      });
+      setNewLanguage('');
+    }
   };
 
   const handleSubmit = (e: React.FormEvent) => {
@@ -200,6 +282,37 @@ const AddProviderForm = () => {
         </DialogHeader>
         
         <form onSubmit={handleSubmit} className="space-y-6">
+          {/* Profile Image Upload */}
+          <Card>
+            <CardHeader>
+              <CardTitle className="text-lg">الصورة الشخصية</CardTitle>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              <div className="flex items-center gap-4">
+                <div className="w-24 h-24 bg-gray-200 rounded-full overflow-hidden">
+                  {imagePreview ? (
+                    <img src={imagePreview} alt="Preview" className="w-full h-full object-cover" />
+                  ) : (
+                    <div className="w-full h-full bg-gray-300 flex items-center justify-center">
+                      <Upload className="w-8 h-8 text-gray-500" />
+                    </div>
+                  )}
+                </div>
+                <div>
+                  <Input
+                    type="file"
+                    accept="image/*"
+                    onChange={handleImageChange}
+                    className="max-w-xs"
+                  />
+                  <p className="text-xs text-gray-500 mt-1">
+                    اختياري - صورة شخصية لمقدم الخدمة
+                  </p>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+
           {/* Basic Information */}
           <Card>
             <CardHeader>
@@ -309,6 +422,53 @@ const AddProviderForm = () => {
             </CardContent>
           </Card>
 
+          {/* Languages */}
+          <Card>
+            <CardHeader>
+              <CardTitle className="text-lg">اللغات</CardTitle>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              <div className="flex flex-wrap gap-2 mb-4">
+                {formData.languages.map((language, index) => (
+                  <Badge key={index} variant="secondary" className="flex items-center gap-1">
+                    {language}
+                    <button
+                      type="button"
+                      onClick={() => removeLanguage(language)}
+                      className="ml-1 hover:text-red-500"
+                    >
+                      <X className="w-3 h-3" />
+                    </button>
+                  </Badge>
+                ))}
+              </div>
+              <div className="flex gap-2">
+                <Select value={newLanguage} onValueChange={setNewLanguage}>
+                  <SelectTrigger className="flex-1">
+                    <SelectValue placeholder="إضافة لغة جديدة" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {commonLanguages
+                      .filter(lang => !formData.languages.includes(lang))
+                      .map((language) => (
+                        <SelectItem key={language} value={language}>
+                          {language}
+                        </SelectItem>
+                      ))}
+                  </SelectContent>
+                </Select>
+                <Button
+                  type="button"
+                  variant="outline"
+                  onClick={() => addLanguage(newLanguage)}
+                  disabled={!newLanguage}
+                >
+                  <Plus className="w-4 h-4" />
+                </Button>
+              </div>
+            </CardContent>
+          </Card>
+
           {/* Working Hours */}
           <Card>
             <CardHeader>
@@ -362,10 +522,10 @@ const AddProviderForm = () => {
           <div className="flex gap-4 pt-4">
             <Button 
               type="submit" 
-              disabled={createProvider.isPending}
+              disabled={createProvider.isPending || isUploading}
               className="flex-1"
             >
-              {createProvider.isPending ? "جاري الحفظ..." : "حفظ مقدم الخدمة"}
+              {createProvider.isPending || isUploading ? "جاري الحفظ..." : "حفظ مقدم الخدمة"}
             </Button>
             <Button 
               type="button" 

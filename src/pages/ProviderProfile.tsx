@@ -6,11 +6,21 @@ import Header from '@/components/Header';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Card, CardContent } from '@/components/ui/card';
+import { Phone, MessageCircle } from 'lucide-react';
 import { useProvider } from '@/hooks/useProviders';
+import WorkingHoursCard from '@/components/WorkingHoursCard';
 
 const ProviderProfile = () => {
   const { id } = useParams<{ id: string }>();
   const { data: provider, isLoading, error } = useProvider(id!);
+
+  const formatPhoneNumber = (phone: string) => {
+    // Simple phone formatting for Morocco
+    if (phone.startsWith('0')) {
+      return phone.replace(/(\d{4})(\d{2})(\d{2})(\d{2})/, '$1 $2 $3 $4');
+    }
+    return phone;
+  };
 
   if (isLoading) {
     return (
@@ -72,8 +82,10 @@ const ProviderProfile = () => {
                         className="w-full h-full object-cover"
                       />
                     ) : (
-                      <div className="w-full h-full bg-gray-300 flex items-center justify-center">
-                        <span className="text-gray-500 text-2xl">👤</span>
+                      <div className="w-full h-full bg-gradient-to-br from-primary/20 to-accent/20 flex items-center justify-center">
+                        <span className="text-primary font-semibold text-4xl">
+                          {provider.name.charAt(0)}
+                        </span>
                       </div>
                     )}
                   </div>
@@ -140,23 +152,44 @@ const ProviderProfile = () => {
               <Card>
                 <CardContent className="p-6">
                   <h2 className="text-xl font-semibold mb-4">التواصل</h2>
-                  <div className="space-y-2">
-                    <p className="text-gray-700">📞 {provider.phone}</p>
-                    {provider.whatsapp && (
-                      <a
-                        href={`https://wa.me/${provider.whatsapp.replace(/\D/g, '')}`}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="inline-flex items-center space-x-2 space-x-reverse text-green-600 hover:text-green-700"
-                      >
-                        <span>📱</span>
-                        <span>تواصل عبر واتساب</span>
+                  <div className="space-y-3">
+                    <div className="flex items-center gap-3">
+                      <Phone className="w-5 h-5 text-gray-500" />
+                      <span className="text-gray-700">{formatPhoneNumber(provider.phone)}</span>
+                      <a href={`tel:${provider.phone}`} className="mr-auto">
+                        <Button size="sm" variant="outline">
+                          اتصال
+                        </Button>
                       </a>
+                    </div>
+                    
+                    {provider.whatsapp && (
+                      <div className="flex items-center gap-3">
+                        <MessageCircle className="w-5 h-5 text-green-600" />
+                        <span className="text-gray-700">{formatPhoneNumber(provider.whatsapp)}</span>
+                        <a
+                          href={`https://wa.me/${provider.whatsapp.replace(/\D/g, '')}`}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="mr-auto"
+                        >
+                          <Button size="sm" className="bg-green-600 hover:bg-green-700">
+                            واتساب
+                          </Button>
+                        </a>
+                      </div>
                     )}
                   </div>
                 </CardContent>
               </Card>
             </div>
+
+            {/* Working Hours - Full Width */}
+            {provider.working_hours && (
+              <div className="px-8 pb-8">
+                <WorkingHoursCard workingHours={provider.working_hours} />
+              </div>
+            )}
             
             {/* CTA Section */}
             <div className="bg-gray-50 p-8 text-center">
