@@ -1,3 +1,4 @@
+
 import React, { useState } from 'react';
 import Layout from '@/components/Layout';
 import { Button } from '@/components/ui/button';
@@ -14,6 +15,7 @@ import {
   useUpdateBookingStatus
 } from '@/hooks/useAdminData';
 import AdminLogin from '@/components/AdminLogin';
+import AddProviderForm from '@/components/AddProviderForm';
 import { 
   Dialog,
   DialogContent,
@@ -123,7 +125,10 @@ const Admin = () => {
           {/* Providers Management */}
           <Card>
             <CardHeader>
-              <CardTitle>إدارة مقدمي الخدمات</CardTitle>
+              <div className="flex justify-between items-center">
+                <CardTitle>إدارة مقدمي الخدمات</CardTitle>
+                <AddProviderForm />
+              </div>
             </CardHeader>
             <CardContent>
               {providersLoading ? (
