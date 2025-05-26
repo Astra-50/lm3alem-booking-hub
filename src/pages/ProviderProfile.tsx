@@ -10,6 +10,22 @@ import { Phone, MessageCircle } from 'lucide-react';
 import { useProvider } from '@/hooks/useProviders';
 import WorkingHoursCard from '@/components/WorkingHoursCard';
 
+interface WorkingHour {
+  available: boolean;
+  start: string;
+  end: string;
+}
+
+interface WorkingHours {
+  monday: WorkingHour;
+  tuesday: WorkingHour;
+  wednesday: WorkingHour;
+  thursday: WorkingHour;
+  friday: WorkingHour;
+  saturday: WorkingHour;
+  sunday: WorkingHour;
+}
+
 const ProviderProfile = () => {
   const { id } = useParams<{ id: string }>();
   const { data: provider, isLoading, error } = useProvider(id!);
@@ -185,9 +201,9 @@ const ProviderProfile = () => {
             </div>
 
             {/* Working Hours - Full Width */}
-            {provider.working_hours && (
+            {provider.working_hours && typeof provider.working_hours === 'object' && (
               <div className="px-8 pb-8">
-                <WorkingHoursCard workingHours={provider.working_hours} />
+                <WorkingHoursCard workingHours={provider.working_hours as WorkingHours} />
               </div>
             )}
             
