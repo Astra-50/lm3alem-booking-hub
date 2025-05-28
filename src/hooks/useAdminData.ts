@@ -86,6 +86,140 @@ export const useUpdateProviderVerification = () => {
   });
 };
 
+export const useUpdateProviderStatus = () => {
+  const queryClient = useQueryClient();
+  const { toast } = useToast();
+  
+  return useMutation({
+    mutationFn: async ({ id, isActive }: { id: string; isActive: boolean }) => {
+      const { data, error } = await supabase
+        .from('service_providers')
+        .update({ is_active: isActive })
+        .eq('id', id)
+        .select()
+        .single();
+      
+      if (error) throw error;
+      
+      // Create audit log
+      await supabase.rpc('create_audit_log', {
+        _action: 'UPDATE',
+        _table_name: 'service_providers',
+        _record_id: id,
+        _new_values: { is_active: isActive }
+      });
+      
+      return data;
+    },
+    onSuccess: (_, variables) => {
+      queryClient.invalidateQueries({ queryKey: ['admin-providers'] });
+      toast({
+        title: "تم التحديث بنجاح",
+        description: variables.isActive ? "تم تفعيل مقدم الخدمة" : "تم إيقاف مقدم الخدمة",
+      });
+    },
+    onError: (error) => {
+      toast({
+        title: "خطأ",
+        description: "فشل في تحديث حالة مقدم الخدمة",
+        variant: "destructive",
+      });
+    },
+  });
+};
+
+export const useUpdateProvider = () => {
+  const queryClient = useQueryClient();
+  const { toast } = useToast();
+  
+  return useMutation({
+    mutationFn: async ({ id, ...updateData }: { id: string; [key: string]: any }) => {
+      const { data, error } = await supabase
+        .from('service_providers')
+        .update(updateData)
+        .eq('id', id)
+        .select()
+        .single();
+      
+      if (error) throw error;
+      
+      // Create audit log
+      await supabase.rpc('create_audit_log', {
+        _action: 'UPDATE',
+        _table_name: 'service_providers',
+        _record_id: id,
+        _new_values: updateData
+      });
+      
+      return data;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['admin-providers'] });
+      toast({
+        title: "تم التحديث بنجاح",
+        description: "تم تحديث بيانات مقدم الخدمة",
+      });
+    },
+    onError: (error) => {
+      toast({
+        title: "خطأ",
+        description: "فشل في تحديث بيانات مقدم الخدمة",
+        variant: "destructive",
+      });
+    },
+  });
+};
+
+export const useDeleteProvider = () => {
+  const queryClient = useQueryClient();
+  const { toast } = useToast();
+  
+  return useMutation({
+    mutationFn: async (id: string) => {
+      // First, delete related booking requests
+      await supabase
+        .from('booking_requests')
+        .delete()
+        .eq('service_provider_id', id);
+      
+      // Then delete the provider
+      const { data, error } = await supabase
+        .from('service_providers')
+        .delete()
+        .eq('id', id)
+        .select()
+        .single();
+      
+      if (error) throw error;
+      
+      // Create audit log
+      await supabase.rpc('create_audit_log', {
+        _action: 'DELETE',
+        _table_name: 'service_providers',
+        _record_id: id,
+        _old_values: data
+      });
+      
+      return data;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['admin-providers'] });
+      queryClient.invalidateQueries({ queryKey: ['admin-bookings'] });
+      toast({
+        title: "تم الحذف بنجاح",
+        description: "تم حذف مقدم الخدمة وجميع البيانات المرتبطة به",
+      });
+    },
+    onError: (error) => {
+      toast({
+        title: "خطأ",
+        description: "فشل في حذف مقدم الخدمة",
+        variant: "destructive",
+      });
+    },
+  });
+};
+
 export const useUpdateBookingStatus = () => {
   const queryClient = useQueryClient();
   const { toast } = useToast();

@@ -201,9 +201,9 @@ const ProviderProfile = () => {
             </div>
 
             {/* Working Hours - Full Width */}
-            {provider.working_hours && typeof provider.working_hours === 'object' && (
+            {provider.working_hours && typeof provider.working_hours === 'object' && !Array.isArray(provider.working_hours) && (
               <div className="px-8 pb-8">
-                <WorkingHoursCard workingHours={provider.working_hours as WorkingHours} />
+                <WorkingHoursCard workingHours={provider.working_hours as unknown as WorkingHours} />
               </div>
             )}
             
