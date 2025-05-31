@@ -3,10 +3,11 @@ import React from 'react';
 import { useParams, Link } from 'react-router-dom';
 import Layout from '@/components/Layout';
 import Header from '@/components/Header';
+import ProviderProfileHeader from '@/components/ProviderProfileHeader';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
-import { Card, CardContent } from '@/components/ui/card';
-import { Phone, MessageCircle } from 'lucide-react';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Phone, MessageCircle, Globe, Clock, Award } from 'lucide-react';
 import { useProvider } from '@/hooks/useProviders';
 import WorkingHoursCard from '@/components/WorkingHoursCard';
 
@@ -29,14 +30,6 @@ interface WorkingHours {
 const ProviderProfile = () => {
   const { id } = useParams<{ id: string }>();
   const { data: provider, isLoading, error } = useProvider(id!);
-
-  const formatPhoneNumber = (phone: string) => {
-    // Simple phone formatting for Morocco
-    if (phone.startsWith('0')) {
-      return phone.replace(/(\d{4})(\d{2})(\d{2})(\d{2})/, '$1 $2 $3 $4');
-    }
-    return phone;
-  };
 
   if (isLoading) {
     return (
@@ -84,95 +77,84 @@ const ProviderProfile = () => {
       <Header />
       
       <div className="py-8">
-        <div className="max-w-4xl mx-auto">
-          <div className="bg-white rounded-xl shadow-lg overflow-hidden">
-            {/* Header Section */}
-            <div className="p-8 border-b">
-              <div className="flex flex-col md:flex-row items-start md:items-center space-y-4 md:space-y-0 md:space-x-6 md:space-x-reverse">
-                <div className="flex-shrink-0">
-                  <div className="w-32 h-32 bg-gray-200 rounded-full overflow-hidden">
-                    {provider.profile_image_url ? (
-                      <img 
-                        src={provider.profile_image_url} 
-                        alt={provider.name}
-                        className="w-full h-full object-cover"
-                      />
-                    ) : (
-                      <div className="w-full h-full bg-gradient-to-br from-primary/20 to-accent/20 flex items-center justify-center">
-                        <span className="text-primary font-semibold text-4xl">
-                          {provider.name.charAt(0)}
-                        </span>
-                      </div>
-                    )}
-                  </div>
-                </div>
-                
-                <div className="flex-1">
-                  <div className="flex items-center space-x-3 space-x-reverse mb-2">
-                    <h1 className="text-3xl font-bold text-gray-900">
-                      {provider.name}
-                    </h1>
-                    {provider.is_verified && (
-                      <Badge className="bg-accent text-accent-foreground">
-                        ✅ موثّق من معلم
-                      </Badge>
-                    )}
-                  </div>
-                  
-                  <p className="text-xl text-primary font-medium mb-2">
-                    {provider.service_types?.name}
-                  </p>
-                  
-                  <p className="text-gray-600 mb-4">
-                    📍 {provider.cities?.name}{provider.neighborhoods?.name && ` - ${provider.neighborhoods.name}`}
-                  </p>
-                  
-                  <Link to={`/booking/${provider.id}`}>
-                    <Button size="lg" className="bg-primary hover:bg-primary/90">
-                      احجز هذا المعلم
-                    </Button>
-                  </Link>
-                </div>
-              </div>
-            </div>
+        <div className="max-w-5xl mx-auto">
+          <div className="bg-white rounded-2xl shadow-xl overflow-hidden">
+            {/* Enhanced Header */}
+            <ProviderProfileHeader provider={provider} />
             
-            {/* Details Sections */}
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 p-8">
-              {/* About */}
-              {provider.experience_description && (
-                <Card>
-                  <CardContent className="p-6">
-                    <h2 className="text-xl font-semibold mb-4">نبذة عن المعلم</h2>
-                    <p className="text-gray-700 leading-relaxed">
-                      {provider.experience_description}
-                    </p>
+            {/* Details Grid */}
+            <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 p-8">
+              {/* Main Content */}
+              <div className="lg:col-span-2 space-y-6">
+                {/* About Section */}
+                {provider.experience_description && (
+                  <Card className="border-0 shadow-md">
+                    <CardHeader>
+                      <CardTitle className="flex items-center space-x-2 space-x-reverse">
+                        <Award className="w-5 h-5 text-primary" />
+                        <span>نبذة عن المعلم</span>
+                      </CardTitle>
+                    </CardHeader>
+                    <CardContent>
+                      <p className="text-gray-700 leading-relaxed text-lg">
+                        {provider.experience_description}
+                      </p>
+                    </CardContent>
+                  </Card>
+                )}
+
+                {/* Working Hours */}
+                {provider.working_hours && typeof provider.working_hours === 'object' && !Array.isArray(provider.working_hours) && (
+                  <Card className="border-0 shadow-md">
+                    <CardHeader>
+                      <CardTitle className="flex items-center space-x-2 space-x-reverse">
+                        <Clock className="w-5 h-5 text-primary" />
+                        <span>أوقات العمل</span>
+                      </CardTitle>
+                    </CardHeader>
+                    <CardContent>
+                      <WorkingHoursCard workingHours={provider.working_hours as unknown as WorkingHours} />
+                    </CardContent>
+                  </Card>
+                )}
+              </div>
+
+              {/* Sidebar */}
+              <div className="space-y-6">
+                {/* Languages */}
+                <Card className="border-0 shadow-md">
+                  <CardHeader>
+                    <CardTitle className="flex items-center space-x-2 space-x-reverse">
+                      <Globe className="w-5 h-5 text-primary" />
+                      <span>اللغات</span>
+                    </CardTitle>
+                  </CardHeader>
+                  <CardContent>
+                    <div className="flex flex-wrap gap-2">
+                      {provider.languages?.map((language, index) => (
+                        <Badge key={index} variant="outline" className="bg-blue-50 text-blue-700 border-blue-200">
+                          {language}
+                        </Badge>
+                      ))}
+                    </div>
                   </CardContent>
                 </Card>
-              )}
-              
-              {/* Languages */}
-              <Card>
-                <CardContent className="p-6">
-                  <h2 className="text-xl font-semibold mb-4">اللغات</h2>
-                  <div className="flex flex-wrap gap-2">
-                    {provider.languages?.map((language, index) => (
-                      <Badge key={index} variant="outline">
-                        {language}
-                      </Badge>
-                    ))}
-                  </div>
-                </CardContent>
-              </Card>
-              
-              {/* Contact */}
-              <Card>
-                <CardContent className="p-6">
-                  <h2 className="text-xl font-semibold mb-4">التواصل</h2>
-                  <div className="space-y-3">
-                    <div className="flex items-center gap-3">
-                      <Phone className="w-5 h-5 text-gray-500" />
-                      <span className="text-gray-700">{formatPhoneNumber(provider.phone)}</span>
-                      <a href={`tel:${provider.phone}`} className="mr-auto">
+                
+                {/* Contact Info */}
+                <Card className="border-0 shadow-md">
+                  <CardHeader>
+                    <CardTitle className="flex items-center space-x-2 space-x-reverse">
+                      <Phone className="w-5 h-5 text-primary" />
+                      <span>معلومات التواصل</span>
+                    </CardTitle>
+                  </CardHeader>
+                  <CardContent className="space-y-4">
+                    <div className="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
+                      <div className="flex items-center space-x-3 space-x-reverse">
+                        <Phone className="w-4 h-4 text-gray-500" />
+                        <span className="text-gray-700">{provider.phone}</span>
+                      </div>
+                      <a href={`tel:${provider.phone}`}>
                         <Button size="sm" variant="outline">
                           اتصال
                         </Button>
@@ -180,41 +162,35 @@ const ProviderProfile = () => {
                     </div>
                     
                     {provider.whatsapp && (
-                      <div className="flex items-center gap-3">
-                        <MessageCircle className="w-5 h-5 text-green-600" />
-                        <span className="text-gray-700">{formatPhoneNumber(provider.whatsapp)}</span>
+                      <div className="flex items-center justify-between p-3 bg-green-50 rounded-lg">
+                        <div className="flex items-center space-x-3 space-x-reverse">
+                          <MessageCircle className="w-4 h-4 text-green-600" />
+                          <span className="text-gray-700">{provider.whatsapp}</span>
+                        </div>
                         <a
                           href={`https://wa.me/${provider.whatsapp.replace(/\D/g, '')}`}
                           target="_blank"
                           rel="noopener noreferrer"
-                          className="mr-auto"
                         >
-                          <Button size="sm" className="bg-green-600 hover:bg-green-700">
+                          <Button size="sm" className="bg-green-600 hover:bg-green-700 text-white">
                             واتساب
                           </Button>
                         </a>
                       </div>
                     )}
-                  </div>
-                </CardContent>
-              </Card>
-            </div>
-
-            {/* Working Hours - Full Width */}
-            {provider.working_hours && typeof provider.working_hours === 'object' && !Array.isArray(provider.working_hours) && (
-              <div className="px-8 pb-8">
-                <WorkingHoursCard workingHours={provider.working_hours as unknown as WorkingHours} />
+                  </CardContent>
+                </Card>
               </div>
-            )}
+            </div>
             
             {/* CTA Section */}
-            <div className="bg-gray-50 p-8 text-center">
-              <h3 className="text-2xl font-semibold mb-4">جاهز للحجز؟</h3>
-              <p className="text-gray-600 mb-6">
+            <div className="bg-gradient-to-r from-primary/10 to-accent/10 p-8 text-center border-t">
+              <h3 className="text-3xl font-bold mb-4 text-gray-900">جاهز للحجز؟</h3>
+              <p className="text-gray-700 mb-6 text-lg">
                 احجز الآن واحصل على خدمة عالية الجودة من {provider.name}
               </p>
               <Link to={`/booking/${provider.id}`}>
-                <Button size="lg" className="bg-primary hover:bg-primary/90">
+                <Button size="lg" className="bg-primary hover:bg-primary/90 px-8 py-3 text-lg">
                   احجز الآن
                 </Button>
               </Link>

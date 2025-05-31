@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { useSearchParams } from 'react-router-dom';
 import Layout from '@/components/Layout';
@@ -128,8 +127,12 @@ const Providers = () => {
                 city={provider.cities?.name || ''}
                 neighborhood={provider.neighborhoods?.name || ''}
                 isVerified={provider.is_verified}
-                isAvailableToday={true} // We'll calculate this later
+                isAvailableToday={true}
                 image={provider.profile_image_url}
+                phone={provider.phone}
+                whatsapp={provider.whatsapp}
+                languages={provider.languages}
+                experienceDescription={provider.experience_description}
               />
             ))}
           </div>

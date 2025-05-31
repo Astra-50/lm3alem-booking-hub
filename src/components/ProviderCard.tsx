@@ -4,6 +4,7 @@ import { Link } from 'react-router-dom';
 import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
+import { Phone, MessageCircle, MapPin, Clock, Star } from 'lucide-react';
 
 interface ProviderCardProps {
   id: string;
@@ -14,6 +15,10 @@ interface ProviderCardProps {
   isVerified: boolean;
   isAvailableToday: boolean;
   image?: string;
+  phone?: string;
+  whatsapp?: string;
+  languages?: string[];
+  experienceDescription?: string;
 }
 
 const ProviderCard = ({ 
@@ -24,52 +29,126 @@ const ProviderCard = ({
   neighborhood, 
   isVerified, 
   isAvailableToday,
-  image 
+  image,
+  phone,
+  whatsapp,
+  languages,
+  experienceDescription
 }: ProviderCardProps) => {
   return (
-    <Card className="hover:shadow-lg transition-shadow duration-300 animate-fade-in">
-      <CardContent className="p-6">
-        <div className="flex items-start space-x-4 space-x-reverse">
-          <div className="flex-shrink-0">
-            <div className="w-16 h-16 bg-gray-200 rounded-full overflow-hidden">
-              {image ? (
-                <img src={image} alt={name} className="w-full h-full object-cover" />
-              ) : (
-                <div className="w-full h-full bg-gradient-to-br from-primary/20 to-accent/20 flex items-center justify-center">
-                  <span className="text-primary font-semibold text-lg">
-                    {name.charAt(0)}
-                  </span>
+    <Card className="hover:shadow-xl transition-all duration-300 animate-fade-in border-0 shadow-md hover:scale-[1.02] bg-gradient-to-br from-white to-gray-50/50">
+      <CardContent className="p-0">
+        {/* Header with image and status badges */}
+        <div className="relative p-6 pb-4">
+          <div className="flex items-start space-x-4 space-x-reverse">
+            <div className="relative flex-shrink-0">
+              <div className="w-20 h-20 bg-gray-200 rounded-xl overflow-hidden shadow-md">
+                {image ? (
+                  <img src={image} alt={name} className="w-full h-full object-cover" />
+                ) : (
+                  <div className="w-full h-full bg-gradient-to-br from-primary/20 to-accent/20 flex items-center justify-center">
+                    <span className="text-primary font-bold text-2xl">
+                      {name.charAt(0)}
+                    </span>
+                  </div>
+                )}
+              </div>
+              {/* Status indicator */}
+              {isAvailableToday && (
+                <div className="absolute -top-1 -right-1 w-4 h-4 bg-green-500 rounded-full border-2 border-white shadow-sm"></div>
+              )}
+            </div>
+            
+            <div className="flex-1 min-w-0">
+              <div className="flex items-start justify-between mb-2">
+                <div className="flex-1">
+                  <h3 className="text-xl font-bold text-gray-900 truncate mb-1">
+                    {name}
+                  </h3>
+                  <div className="flex items-center space-x-2 space-x-reverse mb-2">
+                    {isVerified && (
+                      <Badge variant="secondary" className="bg-accent text-accent-foreground text-xs">
+                        ✅ موثّق
+                      </Badge>
+                    )}
+                    {isAvailableToday && (
+                      <Badge variant="outline" className="text-green-600 border-green-600 text-xs">
+                        <Clock className="w-3 h-3 mr-1" />
+                        متاح اليوم
+                      </Badge>
+                    )}
+                  </div>
+                </div>
+              </div>
+              
+              <p className="text-lg font-medium text-primary mb-1">{service}</p>
+              <div className="flex items-center text-sm text-gray-600 mb-2">
+                <MapPin className="w-4 h-4 ml-1 text-gray-400" />
+                <span>{city} - {neighborhood}</span>
+              </div>
+              
+              {/* Languages */}
+              {languages && languages.length > 0 && (
+                <div className="flex flex-wrap gap-1 mb-3">
+                  {languages.slice(0, 3).map((language, index) => (
+                    <Badge key={index} variant="outline" className="text-xs bg-blue-50 text-blue-700 border-blue-200">
+                      {language}
+                    </Badge>
+                  ))}
+                  {languages.length > 3 && (
+                    <Badge variant="outline" className="text-xs bg-gray-50 text-gray-600">
+                      +{languages.length - 3}
+                    </Badge>
+                  )}
                 </div>
               )}
             </div>
           </div>
+        </div>
+
+        {/* Experience preview */}
+        {experienceDescription && (
+          <div className="px-6 pb-4">
+            <p className="text-sm text-gray-600 line-clamp-2 leading-relaxed">
+              {experienceDescription.length > 120 
+                ? `${experienceDescription.substring(0, 120)}...` 
+                : experienceDescription
+              }
+            </p>
+          </div>
+        )}
+
+        {/* Action buttons */}
+        <div className="px-6 pb-6 space-y-3">
+          <Link to={`/provider/${id}`} className="block">
+            <Button className="w-full bg-primary hover:bg-primary/90 text-white font-medium">
+              عرض الملف الشخصي والحجز
+            </Button>
+          </Link>
           
-          <div className="flex-1 min-w-0">
-            <div className="flex items-center space-x-2 space-x-reverse mb-2">
-              <h3 className="text-lg font-semibold text-gray-900 truncate">
-                {name}
-              </h3>
-              {isVerified && (
-                <Badge variant="secondary" className="bg-accent text-accent-foreground">
-                  ✅ موثّق من معلم
-                </Badge>
-              )}
-            </div>
-            
-            <p className="text-sm text-gray-600 mb-1">{service}</p>
-            <p className="text-sm text-gray-500 mb-3">{city} - {neighborhood}</p>
-            
-            {isAvailableToday && (
-              <Badge variant="outline" className="text-green-600 border-green-600 mb-3">
-                متاح اليوم
-              </Badge>
+          {/* Quick contact buttons */}
+          <div className="flex space-x-2 space-x-reverse">
+            {phone && (
+              <a href={`tel:${phone}`} className="flex-1">
+                <Button variant="outline" size="sm" className="w-full text-xs">
+                  <Phone className="w-3 h-3 mr-1" />
+                  اتصال
+                </Button>
+              </a>
             )}
-            
-            <Link to={`/provider/${id}`}>
-              <Button variant="outline" className="w-full">
-                عرض الملف الشخصي
-              </Button>
-            </Link>
+            {whatsapp && (
+              <a 
+                href={`https://wa.me/${whatsapp.replace(/\D/g, '')}`}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="flex-1"
+              >
+                <Button variant="outline" size="sm" className="w-full text-xs text-green-600 border-green-600 hover:bg-green-50">
+                  <MessageCircle className="w-3 h-3 mr-1" />
+                  واتساب
+                </Button>
+              </a>
+            )}
           </div>
         </div>
       </CardContent>
