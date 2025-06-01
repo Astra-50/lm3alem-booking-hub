@@ -2,7 +2,6 @@
 import React from 'react';
 import { useParams, Link } from 'react-router-dom';
 import Layout from '@/components/Layout';
-import Header from '@/components/Header';
 import ProviderProfileHeader from '@/components/ProviderProfileHeader';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
@@ -34,7 +33,6 @@ const ProviderProfile = () => {
   if (isLoading) {
     return (
       <Layout>
-        <Header />
         <div className="py-8">
           <div className="max-w-4xl mx-auto">
             <div className="bg-white rounded-xl shadow-lg overflow-hidden animate-pulse">
@@ -59,7 +57,6 @@ const ProviderProfile = () => {
   if (error || !provider) {
     return (
       <Layout>
-        <Header />
         <div className="py-8">
           <div className="max-w-4xl mx-auto text-center">
             <p className="text-red-500 mb-4">لم يتم العثور على مقدم الخدمة</p>
@@ -74,8 +71,6 @@ const ProviderProfile = () => {
 
   return (
     <Layout>
-      <Header />
-      
       <div className="py-8">
         <div className="max-w-5xl mx-auto">
           <div className="bg-white rounded-2xl shadow-xl overflow-hidden">

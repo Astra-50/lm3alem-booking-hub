@@ -6,20 +6,26 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Badge } from '@/components/ui/badge';
 import { useCities } from '@/hooks/useCities';
 import { useServiceTypes } from '@/hooks/useServiceTypes';
-import { CheckCircle, Clock, Star, Zap } from 'lucide-react';
+import { CheckCircle, Clock, Star, Zap, Database } from 'lucide-react';
+import DataSeeder from '@/components/DataSeeder';
 
 const HeroSection = () => {
   const [selectedCity, setSelectedCity] = useState('');
   const [selectedService, setSelectedService] = useState('');
   const [isVisible, setIsVisible] = useState(false);
+  const [showSeeder, setShowSeeder] = useState(false);
   const navigate = useNavigate();
   
-  const { data: cities, isLoading: citiesLoading } = useCities();
-  const { data: services, isLoading: servicesLoading } = useServiceTypes();
+  const { data: cities, isLoading: citiesLoading, error: citiesError } = useCities();
+  const { data: services, isLoading: servicesLoading, error: servicesError } = useServiceTypes();
 
   useEffect(() => {
     setIsVisible(true);
-  }, []);
+    // Show seeder if no data is available
+    if (!citiesLoading && !servicesLoading && (!cities?.length || !services?.length)) {
+      setShowSeeder(true);
+    }
+  }, [cities, services, citiesLoading, servicesLoading]);
 
   const handleSearch = () => {
     const params = new URLSearchParams();
@@ -28,6 +34,51 @@ const HeroSection = () => {
     
     navigate(`/providers${params.toString() ? `?${params.toString()}` : ''}`);
   };
+
+  // Show data seeder if no data
+  if (showSeeder && (!cities?.length || !services?.length)) {
+    return (
+      <div className="relative min-h-screen flex items-center justify-center overflow-hidden bg-gradient-to-br from-slate-50 via-blue-50 to-indigo-50">
+        <div className="max-w-2xl mx-auto px-4">
+          <div className="text-center mb-8">
+            <h1 className="text-4xl font-bold text-gray-900 mb-4">مرحباً بك في معلّم</h1>
+            <p className="text-xl text-gray-600">يبدو أن قاعدة البيانات فارغة. أضف بعض البيانات التجريبية للبدء!</p>
+          </div>
+          <DataSeeder />
+          <div className="text-center mt-6">
+            <Button 
+              variant="outline" 
+              onClick={() => window.location.reload()}
+              className="text-blue-600 border-blue-300 hover:bg-blue-50"
+            >
+              تحديث الصفحة
+            </Button>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  // Show error state
+  if (citiesError || servicesError) {
+    return (
+      <div className="relative min-h-screen flex items-center justify-center overflow-hidden bg-gradient-to-br from-slate-50 via-blue-50 to-indigo-50">
+        <div className="max-w-2xl mx-auto px-4 text-center">
+          <div className="bg-red-50 border border-red-200 rounded-xl p-8">
+            <div className="text-red-600 text-5xl mb-4">⚠️</div>
+            <h3 className="text-xl font-bold text-red-800 mb-2">حدث خطأ في تحميل البيانات</h3>
+            <p className="text-red-600 mb-6">تأكد من اتصال قاعدة البيانات وحاول مرة أخرى</p>
+            <Button 
+              onClick={() => window.location.reload()} 
+              className="bg-red-600 hover:bg-red-700 text-white"
+            >
+              إعادة المحاولة
+            </Button>
+          </div>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="relative min-h-screen flex items-center justify-center overflow-hidden bg-gradient-to-br from-slate-50 via-blue-50 to-indigo-50">
@@ -131,6 +182,26 @@ const HeroSection = () => {
             <span className="text-lg font-medium">تقييمات ممتازة</span>
           </div>
         </div>
+
+        {/* Dev mode seeder button */}
+        {process.env.NODE_ENV === 'development' && (
+          <div className="mt-8">
+            <Button 
+              variant="outline" 
+              size="sm" 
+              onClick={() => setShowSeeder(!showSeeder)}
+              className="text-xs text-gray-500 border-gray-300"
+            >
+              <Database className="w-3 h-3 mr-1" />
+              أدوات المطور
+            </Button>
+            {showSeeder && (
+              <div className="mt-4 max-w-md mx-auto">
+                <DataSeeder />
+              </div>
+            )}
+          </div>
+        )}
       </div>
     </div>
   );
