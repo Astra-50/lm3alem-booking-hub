@@ -157,6 +157,72 @@ export type Database = {
           },
         ]
       }
+      provider_applications: {
+        Row: {
+          admin_notes: string | null
+          city_id: string
+          created_at: string
+          email: string | null
+          experience_description: string
+          experience_years: number
+          full_name: string
+          id: string
+          languages: string[]
+          phone: string
+          service_type_id: string
+          status: string
+          updated_at: string
+          whatsapp: string | null
+        }
+        Insert: {
+          admin_notes?: string | null
+          city_id: string
+          created_at?: string
+          email?: string | null
+          experience_description: string
+          experience_years: number
+          full_name: string
+          id?: string
+          languages?: string[]
+          phone: string
+          service_type_id: string
+          status?: string
+          updated_at?: string
+          whatsapp?: string | null
+        }
+        Update: {
+          admin_notes?: string | null
+          city_id?: string
+          created_at?: string
+          email?: string | null
+          experience_description?: string
+          experience_years?: number
+          full_name?: string
+          id?: string
+          languages?: string[]
+          phone?: string
+          service_type_id?: string
+          status?: string
+          updated_at?: string
+          whatsapp?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "provider_applications_city_id_fkey"
+            columns: ["city_id"]
+            isOneToOne: false
+            referencedRelation: "cities"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "provider_applications_service_type_id_fkey"
+            columns: ["service_type_id"]
+            isOneToOne: false
+            referencedRelation: "service_types"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       service_providers: {
         Row: {
           city_id: string

@@ -53,7 +53,7 @@ const JoinProvider = () => {
   const onSubmit = async (data: JoinProviderForm) => {
     try {
       const { error } = await supabase
-        .from('provider_applications')
+        .from('provider_applications' as any)
         .insert([{
           full_name: data.full_name,
           phone: data.phone,
@@ -87,24 +87,24 @@ const JoinProvider = () => {
 
   return (
     <Layout>
-      <div className="py-8">
+      <div className="py-8 px-4">
         <div className="max-w-2xl mx-auto">
           <Card className="shadow-xl">
             <CardHeader className="text-center bg-gradient-to-r from-primary/10 to-accent/10">
               <div className="mx-auto w-16 h-16 bg-primary/20 rounded-full flex items-center justify-center mb-4">
                 <UserPlus className="w-8 h-8 text-primary" />
               </div>
-              <CardTitle className="text-3xl font-bold text-gray-800 mb-2">
+              <CardTitle className="text-2xl md:text-3xl font-bold text-gray-800 mb-2">
                 انضم كمقدم خدمة
               </CardTitle>
-              <p className="text-gray-600 text-lg">
+              <p className="text-gray-600 text-base md:text-lg">
                 كن جزءاً من شبكة المعلمين المحترفين في المغرب
               </p>
             </CardHeader>
-            <CardContent className="p-8">
+            <CardContent className="p-4 md:p-8">
               <Form {...form}>
                 <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
                     <FormField
                       control={form.control}
                       name="full_name"
@@ -137,7 +137,7 @@ const JoinProvider = () => {
                     />
                   </div>
 
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
                     <FormField
                       control={form.control}
                       name="whatsapp"
@@ -167,7 +167,7 @@ const JoinProvider = () => {
                     />
                   </div>
 
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
                     <FormField
                       control={form.control}
                       name="city_id"
@@ -225,7 +225,7 @@ const JoinProvider = () => {
                     />
                   </div>
 
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
                     <FormField
                       control={form.control}
                       name="experience_years"
@@ -276,7 +276,7 @@ const JoinProvider = () => {
                           <Textarea
                             {...field}
                             placeholder="اكتب وصفاً تفصيلياً عن خبرتك ومهاراتك في هذا المجال..."
-                            className="min-h-[120px] resize-none"
+                            className="min-h-[100px] md:min-h-[120px] resize-none"
                           />
                         </FormControl>
                         <FormMessage />
@@ -284,7 +284,7 @@ const JoinProvider = () => {
                     )}
                   />
 
-                  <div className="bg-blue-50 p-6 rounded-lg">
+                  <div className="bg-blue-50 p-4 md:p-6 rounded-lg">
                     <h3 className="font-semibold text-blue-800 mb-2">ملاحظة مهمة:</h3>
                     <p className="text-blue-700 text-sm">
                       سيتم مراجعة طلبك من قبل فريقنا والتواصل معك خلال 48 ساعة. 
@@ -295,7 +295,7 @@ const JoinProvider = () => {
                   <Button
                     type="submit"
                     size="lg"
-                    className="w-full h-14 text-lg font-semibold bg-primary hover:bg-primary/90"
+                    className="w-full h-12 md:h-14 text-base md:text-lg font-semibold bg-primary hover:bg-primary/90"
                     disabled={form.formState.isSubmitting}
                   >
                     {form.formState.isSubmitting ? (

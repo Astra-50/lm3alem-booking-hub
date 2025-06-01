@@ -14,6 +14,7 @@ interface ProviderApplication {
   experience_description: string;
   languages: string[];
   status: 'pending' | 'approved' | 'rejected';
+  admin_notes?: string;
   created_at: string;
   cities?: { name: string };
   service_types?: { name: string };
@@ -24,7 +25,7 @@ export const useProviderApplications = () => {
     queryKey: ['provider-applications'],
     queryFn: async () => {
       const { data, error } = await supabase
-        .from('provider_applications')
+        .from('provider_applications' as any)
         .select(`
           *,
           cities(name),
@@ -42,10 +43,10 @@ export const useUpdateApplicationStatus = () => {
   const queryClient = useQueryClient();
   
   return useMutation({
-    mutationFn: async ({ id, status }: { id: string; status: 'approved' | 'rejected' }) => {
+    mutationFn: async ({ id, status, admin_notes }: { id: string; status: 'pending' | 'approved' | 'rejected'; admin_notes?: string }) => {
       const { error } = await supabase
-        .from('provider_applications')
-        .update({ status })
+        .from('provider_applications' as any)
+        .update({ status, admin_notes })
         .eq('id', id);
 
       if (error) throw error;
