@@ -1,7 +1,7 @@
+
 import React, { useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import Layout from '@/components/Layout';
-import Header from '@/components/Header';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
@@ -10,6 +10,7 @@ import { Label } from '@/components/ui/label';
 import { useToast } from '@/hooks/use-toast';
 import { useProvider } from '@/hooks/useProviders';
 import { useCreateBooking } from '@/hooks/useBooking';
+import { Calendar, Clock, User, Phone, MessageSquare } from 'lucide-react';
 
 const Booking = () => {
   const { providerId } = useParams<{ providerId: string }>();
@@ -145,17 +146,16 @@ const Booking = () => {
   if (providerLoading) {
     return (
       <Layout>
-        <Header />
-        <div className="py-8">
+        <div className="py-16">
           <div className="max-w-2xl mx-auto">
-            <Card>
+            <Card className="border-blue-100 shadow-xl">
               <CardContent className="p-8">
-                <div className="animate-pulse">
-                  <div className="h-6 bg-gray-200 rounded mb-4"></div>
-                  <div className="h-4 bg-gray-200 rounded mb-8"></div>
+                <div className="animate-pulse space-y-6">
+                  <div className="h-8 bg-gradient-to-r from-blue-200 to-purple-200 rounded-xl"></div>
+                  <div className="h-4 bg-gray-200 rounded-lg"></div>
                   <div className="space-y-4">
                     {[...Array(6)].map((_, i) => (
-                      <div key={i} className="h-12 bg-gray-200 rounded"></div>
+                      <div key={i} className="h-12 bg-gray-100 rounded-xl"></div>
                     ))}
                   </div>
                 </div>
@@ -170,13 +170,18 @@ const Booking = () => {
   if (!provider) {
     return (
       <Layout>
-        <Header />
-        <div className="py-8">
+        <div className="py-16">
           <div className="max-w-2xl mx-auto text-center">
-            <p className="text-red-500 mb-4">لم يتم العثور على مقدم الخدمة</p>
-            <Button onClick={() => navigate('/providers')}>
-              العودة إلى قائمة مقدمي الخدمات
-            </Button>
+            <div className="bg-red-50 border border-red-200 rounded-2xl p-8">
+              <div className="text-red-600 text-5xl mb-4">❌</div>
+              <h3 className="text-xl font-bold text-red-800 mb-4">لم يتم العثور على مقدم الخدمة</h3>
+              <Button 
+                onClick={() => navigate('/providers')}
+                className="bg-red-600 hover:bg-red-700 text-white"
+              >
+                العودة إلى قائمة مقدمي الخدمات
+              </Button>
+            </div>
           </div>
         </div>
       </Layout>
@@ -185,40 +190,42 @@ const Booking = () => {
 
   return (
     <Layout>
-      <Header />
-      
-      <div className="py-8">
+      <div className="py-16">
         <div className="max-w-2xl mx-auto">
-          <Card>
-            <CardHeader>
-              <CardTitle className="text-2xl text-center">احجز الخدمة</CardTitle>
-              <p className="text-center text-gray-600">
+          <Card className="border-blue-100 shadow-2xl bg-white/95 backdrop-blur-sm">
+            <CardHeader className="text-center pb-6 bg-gradient-to-r from-blue-50 to-purple-50 rounded-t-xl">
+              <CardTitle className="text-3xl font-bold bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">
+                احجز الخدمة
+              </CardTitle>
+              <p className="text-gray-600 text-lg mt-2">
                 أكمل النموذج وسيتواصل معك {provider.name} قريباً
               </p>
             </CardHeader>
             
-            <CardContent>
-              <form onSubmit={handleSubmit} className="space-y-6">
+            <CardContent className="p-8">
+              <form onSubmit={handleSubmit} className="space-y-8">
                 {/* Full Name */}
-                <div>
-                  <Label htmlFor="fullName" className="text-right block mb-2">
-                    الاسم الكامل <span className="text-red-500">*</span>
+                <div className="space-y-3">
+                  <Label htmlFor="fullName" className="text-right flex items-center space-x-2 space-x-reverse text-lg font-medium">
+                    <User className="w-5 h-5 text-blue-600" />
+                    <span>الاسم الكامل <span className="text-red-500">*</span></span>
                   </Label>
                   <Input
                     id="fullName"
                     value={formData.fullName}
                     onChange={(e) => handleChange('fullName', e.target.value)}
                     placeholder="أدخل اسمك الكامل"
-                    className="text-right"
+                    className="text-right h-12 border-blue-200 focus:border-blue-400 focus:ring-blue-400/50"
                     required
                     disabled={createBookingMutation.isPending}
                   />
                 </div>
                 
                 {/* Phone */}
-                <div>
-                  <Label htmlFor="phone" className="text-right block mb-2">
-                    رقم الهاتف <span className="text-red-500">*</span>
+                <div className="space-y-3">
+                  <Label htmlFor="phone" className="text-right flex items-center space-x-2 space-x-reverse text-lg font-medium">
+                    <Phone className="w-5 h-5 text-blue-600" />
+                    <span>رقم الهاتف <span className="text-red-500">*</span></span>
                   </Label>
                   <Input
                     id="phone"
@@ -226,16 +233,17 @@ const Booking = () => {
                     value={formData.phone}
                     onChange={(e) => handleChange('phone', e.target.value)}
                     placeholder="0612345678"
-                    className="text-right"
+                    className="text-right h-12 border-blue-200 focus:border-blue-400 focus:ring-blue-400/50"
                     required
                     disabled={createBookingMutation.isPending}
                   />
                 </div>
                 
                 {/* WhatsApp */}
-                <div>
-                  <Label htmlFor="whatsapp" className="text-right block mb-2">
-                    رقم واتساب (اختياري)
+                <div className="space-y-3">
+                  <Label htmlFor="whatsapp" className="text-right flex items-center space-x-2 space-x-reverse text-lg font-medium">
+                    <MessageSquare className="w-5 h-5 text-green-600" />
+                    <span>رقم واتساب (اختياري)</span>
                   </Label>
                   <Input
                     id="whatsapp"
@@ -243,39 +251,41 @@ const Booking = () => {
                     value={formData.whatsapp}
                     onChange={(e) => handleChange('whatsapp', e.target.value)}
                     placeholder="0612345678"
-                    className="text-right"
+                    className="text-right h-12 border-blue-200 focus:border-blue-400 focus:ring-blue-400/50"
                     disabled={createBookingMutation.isPending}
                   />
                 </div>
                 
                 {/* Date and Time */}
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                  <div>
-                    <Label htmlFor="date" className="text-right block mb-2">
-                      التاريخ المطلوب <span className="text-red-500">*</span>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                  <div className="space-y-3">
+                    <Label htmlFor="date" className="text-right flex items-center space-x-2 space-x-reverse text-lg font-medium">
+                      <Calendar className="w-5 h-5 text-blue-600" />
+                      <span>التاريخ المطلوب <span className="text-red-500">*</span></span>
                     </Label>
                     <Input
                       id="date"
                       type="date"
                       value={formData.date}
                       onChange={(e) => handleChange('date', e.target.value)}
-                      className="text-right"
+                      className="text-right h-12 border-blue-200 focus:border-blue-400 focus:ring-blue-400/50"
                       required
                       disabled={createBookingMutation.isPending}
                       min={new Date().toISOString().split('T')[0]}
                     />
                   </div>
                   
-                  <div>
-                    <Label htmlFor="time" className="text-right block mb-2">
-                      الوقت المطلوب <span className="text-red-500">*</span>
+                  <div className="space-y-3">
+                    <Label htmlFor="time" className="text-right flex items-center space-x-2 space-x-reverse text-lg font-medium">
+                      <Clock className="w-5 h-5 text-blue-600" />
+                      <span>الوقت المطلوب <span className="text-red-500">*</span></span>
                     </Label>
                     <Input
                       id="time"
                       type="time"
                       value={formData.time}
                       onChange={(e) => handleChange('time', e.target.value)}
-                      className="text-right"
+                      className="text-right h-12 border-blue-200 focus:border-blue-400 focus:ring-blue-400/50"
                       required
                       disabled={createBookingMutation.isPending}
                     />
@@ -283,8 +293,8 @@ const Booking = () => {
                 </div>
                 
                 {/* Description */}
-                <div>
-                  <Label htmlFor="description" className="text-right block mb-2">
+                <div className="space-y-3">
+                  <Label htmlFor="description" className="text-right text-lg font-medium">
                     وصف العمل المطلوب
                   </Label>
                   <Textarea
@@ -292,8 +302,8 @@ const Booking = () => {
                     value={formData.description}
                     onChange={(e) => handleChange('description', e.target.value)}
                     placeholder="صف العمل الذي تحتاجه بالتفصيل..."
-                    className="text-right min-h-[100px]"
-                    rows={4}
+                    className="text-right min-h-[120px] border-blue-200 focus:border-blue-400 focus:ring-blue-400/50 resize-none"
+                    rows={5}
                     disabled={createBookingMutation.isPending}
                   />
                 </div>
@@ -301,14 +311,21 @@ const Booking = () => {
                 {/* Submit Button */}
                 <Button 
                   type="submit" 
-                  className="w-full bg-primary hover:bg-primary/90 text-lg py-3"
+                  className="w-full bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white text-lg py-4 h-14 shadow-xl hover:shadow-2xl transition-all duration-300 transform hover:scale-[1.02]"
                   disabled={createBookingMutation.isPending}
                 >
-                  {createBookingMutation.isPending ? 'جاري الإرسال...' : 'إرسال طلب الحجز'}
+                  {createBookingMutation.isPending ? (
+                    <div className="flex items-center space-x-2 space-x-reverse">
+                      <div className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin"></div>
+                      <span>جاري الإرسال...</span>
+                    </div>
+                  ) : (
+                    'إرسال طلب الحجز'
+                  )}
                 </Button>
                 
-                <p className="text-sm text-gray-600 text-center">
-                  بإرسال هذا النموذج، أنت توافق على السماح لمقدم الخدمة بالتواصل معك
+                <p className="text-sm text-gray-600 text-center bg-blue-50 p-4 rounded-xl">
+                  <span className="font-medium">ملاحظة:</span> بإرسال هذا النموذج، أنت توافق على السماح لمقدم الخدمة بالتواصل معك
                 </p>
               </form>
             </CardContent>
