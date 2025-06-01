@@ -3,14 +3,15 @@ import React, { useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import Layout from '@/components/Layout';
 import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { Textarea } from '@/components/ui/textarea';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Label } from '@/components/ui/label';
 import { useToast } from '@/hooks/use-toast';
 import { useProvider } from '@/hooks/useProviders';
 import { useCreateBooking } from '@/hooks/useBooking';
-import { Calendar, Clock, User, Phone, MessageSquare } from 'lucide-react';
+import PersonalInfoFields from '@/components/booking/PersonalInfoFields';
+import DateTimeFields from '@/components/booking/DateTimeFields';
+import DescriptionField from '@/components/booking/DescriptionField';
+import BookingSubmitButton from '@/components/booking/BookingSubmitButton';
+import { useBookingFormValidation } from '@/components/booking/BookingFormValidation';
 
 const Booking = () => {
   const { providerId } = useParams<{ providerId: string }>();
@@ -19,6 +20,7 @@ const Booking = () => {
   
   const { data: provider, isLoading: providerLoading } = useProvider(providerId!);
   const createBookingMutation = useCreateBooking();
+  const { validateForm } = useBookingFormValidation();
   
   const [formData, setFormData] = useState({
     fullName: '',
@@ -35,40 +37,7 @@ const Booking = () => {
     console.log('Form submission started with data:', formData);
     console.log('Provider ID:', providerId);
     
-    // Enhanced validation
-    if (!formData.fullName?.trim()) {
-      toast({
-        title: "خطأ",
-        description: "يرجى إدخال الاسم الكامل",
-        variant: "destructive",
-      });
-      return;
-    }
-    
-    if (!formData.phone?.trim()) {
-      toast({
-        title: "خطأ",
-        description: "يرجى إدخال رقم الهاتف",
-        variant: "destructive",
-      });
-      return;
-    }
-    
-    if (!formData.date) {
-      toast({
-        title: "خطأ",
-        description: "يرجى اختيار التاريخ",
-        variant: "destructive",
-      });
-      return;
-    }
-    
-    if (!formData.time) {
-      toast({
-        title: "خطأ",
-        description: "يرجى اختيار الوقت",
-        variant: "destructive",
-      });
+    if (!validateForm(formData)) {
       return;
     }
 
@@ -120,7 +89,6 @@ const Booking = () => {
       if (error?.message) {
         console.error('Error message:', error.message);
         
-        // Handle specific error types
         if (error.message.includes('violates row-level security')) {
           errorMessage = "خطأ في الأمان. يرجى المحاولة مرة أخرى";
         } else if (error.message.includes('duplicate key')) {
@@ -204,129 +172,28 @@ const Booking = () => {
             
             <CardContent className="p-8">
               <form onSubmit={handleSubmit} className="space-y-8">
-                {/* Full Name */}
-                <div className="space-y-3">
-                  <Label htmlFor="fullName" className="text-right flex items-center space-x-2 space-x-reverse text-lg font-medium">
-                    <User className="w-5 h-5 text-blue-600" />
-                    <span>الاسم الكامل <span className="text-red-500">*</span></span>
-                  </Label>
-                  <Input
-                    id="fullName"
-                    value={formData.fullName}
-                    onChange={(e) => handleChange('fullName', e.target.value)}
-                    placeholder="أدخل اسمك الكامل"
-                    className="text-right h-12 border-blue-200 focus:border-blue-400 focus:ring-blue-400/50"
-                    required
-                    disabled={createBookingMutation.isPending}
-                  />
-                </div>
-                
-                {/* Phone */}
-                <div className="space-y-3">
-                  <Label htmlFor="phone" className="text-right flex items-center space-x-2 space-x-reverse text-lg font-medium">
-                    <Phone className="w-5 h-5 text-blue-600" />
-                    <span>رقم الهاتف <span className="text-red-500">*</span></span>
-                  </Label>
-                  <Input
-                    id="phone"
-                    type="tel"
-                    value={formData.phone}
-                    onChange={(e) => handleChange('phone', e.target.value)}
-                    placeholder="0612345678"
-                    className="text-right h-12 border-blue-200 focus:border-blue-400 focus:ring-blue-400/50"
-                    required
-                    disabled={createBookingMutation.isPending}
-                  />
-                </div>
-                
-                {/* WhatsApp */}
-                <div className="space-y-3">
-                  <Label htmlFor="whatsapp" className="text-right flex items-center space-x-2 space-x-reverse text-lg font-medium">
-                    <MessageSquare className="w-5 h-5 text-green-600" />
-                    <span>رقم واتساب (اختياري)</span>
-                  </Label>
-                  <Input
-                    id="whatsapp"
-                    type="tel"
-                    value={formData.whatsapp}
-                    onChange={(e) => handleChange('whatsapp', e.target.value)}
-                    placeholder="0612345678"
-                    className="text-right h-12 border-blue-200 focus:border-blue-400 focus:ring-blue-400/50"
-                    disabled={createBookingMutation.isPending}
-                  />
-                </div>
-                
-                {/* Date and Time */}
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                  <div className="space-y-3">
-                    <Label htmlFor="date" className="text-right flex items-center space-x-2 space-x-reverse text-lg font-medium">
-                      <Calendar className="w-5 h-5 text-blue-600" />
-                      <span>التاريخ المطلوب <span className="text-red-500">*</span></span>
-                    </Label>
-                    <Input
-                      id="date"
-                      type="date"
-                      value={formData.date}
-                      onChange={(e) => handleChange('date', e.target.value)}
-                      className="text-right h-12 border-blue-200 focus:border-blue-400 focus:ring-blue-400/50"
-                      required
-                      disabled={createBookingMutation.isPending}
-                      min={new Date().toISOString().split('T')[0]}
-                    />
-                  </div>
-                  
-                  <div className="space-y-3">
-                    <Label htmlFor="time" className="text-right flex items-center space-x-2 space-x-reverse text-lg font-medium">
-                      <Clock className="w-5 h-5 text-blue-600" />
-                      <span>الوقت المطلوب <span className="text-red-500">*</span></span>
-                    </Label>
-                    <Input
-                      id="time"
-                      type="time"
-                      value={formData.time}
-                      onChange={(e) => handleChange('time', e.target.value)}
-                      className="text-right h-12 border-blue-200 focus:border-blue-400 focus:ring-blue-400/50"
-                      required
-                      disabled={createBookingMutation.isPending}
-                    />
-                  </div>
-                </div>
-                
-                {/* Description */}
-                <div className="space-y-3">
-                  <Label htmlFor="description" className="text-right text-lg font-medium">
-                    وصف العمل المطلوب
-                  </Label>
-                  <Textarea
-                    id="description"
-                    value={formData.description}
-                    onChange={(e) => handleChange('description', e.target.value)}
-                    placeholder="صف العمل الذي تحتاجه بالتفصيل..."
-                    className="text-right min-h-[120px] border-blue-200 focus:border-blue-400 focus:ring-blue-400/50 resize-none"
-                    rows={5}
-                    disabled={createBookingMutation.isPending}
-                  />
-                </div>
-                
-                {/* Submit Button */}
-                <Button 
-                  type="submit" 
-                  className="w-full bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white text-lg py-4 h-14 shadow-xl hover:shadow-2xl transition-all duration-300 transform hover:scale-[1.02]"
+                <PersonalInfoFields
+                  fullName={formData.fullName}
+                  phone={formData.phone}
+                  whatsapp={formData.whatsapp}
+                  onChange={handleChange}
                   disabled={createBookingMutation.isPending}
-                >
-                  {createBookingMutation.isPending ? (
-                    <div className="flex items-center space-x-2 space-x-reverse">
-                      <div className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin"></div>
-                      <span>جاري الإرسال...</span>
-                    </div>
-                  ) : (
-                    'إرسال طلب الحجز'
-                  )}
-                </Button>
+                />
                 
-                <p className="text-sm text-gray-600 text-center bg-blue-50 p-4 rounded-xl">
-                  <span className="font-medium">ملاحظة:</span> بإرسال هذا النموذج، أنت توافق على السماح لمقدم الخدمة بالتواصل معك
-                </p>
+                <DateTimeFields
+                  date={formData.date}
+                  time={formData.time}
+                  onChange={handleChange}
+                  disabled={createBookingMutation.isPending}
+                />
+                
+                <DescriptionField
+                  description={formData.description}
+                  onChange={handleChange}
+                  disabled={createBookingMutation.isPending}
+                />
+                
+                <BookingSubmitButton isLoading={createBookingMutation.isPending} />
               </form>
             </CardContent>
           </Card>
