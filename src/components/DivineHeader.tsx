@@ -35,6 +35,7 @@ const DivineHeader = () => {
   const navItems = [
     { name: 'الرئيسية', href: '/', current: location.pathname === '/' },
     { name: 'مقدمو الخدمات', href: '/providers', current: location.pathname === '/providers' },
+    { name: 'انضم كمعلم', href: '/join-provider', current: location.pathname === '/join-provider' },
   ];
 
   const services = [

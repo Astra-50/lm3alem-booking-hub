@@ -1,4 +1,3 @@
-
 import React from 'react';
 import Layout from '@/components/Layout';
 import { useAuth } from '@/hooks/useAuth';
@@ -7,6 +6,7 @@ import AdminLogin from '@/components/AdminLogin';
 import AdminHeader from '@/components/admin/AdminHeader';
 import ProvidersManagement from '@/components/admin/ProvidersManagement';
 import BookingsManagement from '@/components/admin/BookingsManagement';
+import ProviderApplicationsManagement from '@/components/admin/ProviderApplicationsManagement';
 
 const Admin = () => {
   const { user } = useAuth();
@@ -34,9 +34,15 @@ const Admin = () => {
       <div className="py-8">
         <AdminHeader userEmail={user.email} />
         
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
-          <ProvidersManagement />
-          <BookingsManagement />
+        <div className="space-y-8">
+          {/* Provider Applications Section */}
+          <ProviderApplicationsManagement />
+          
+          {/* Existing Management Sections */}
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+            <ProvidersManagement />
+            <BookingsManagement />
+          </div>
         </div>
       </div>
     </Layout>

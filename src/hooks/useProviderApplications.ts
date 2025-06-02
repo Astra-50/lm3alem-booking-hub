@@ -1,8 +1,9 @@
 
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
+import { useToast } from '@/hooks/use-toast';
 
-interface ProviderApplication {
+export interface ProviderApplication {
   id: string;
   full_name: string;
   phone: string;
@@ -16,8 +17,13 @@ interface ProviderApplication {
   status: 'pending' | 'approved' | 'rejected';
   admin_notes?: string;
   created_at: string;
-  cities?: { name: string };
-  service_types?: { name: string };
+  updated_at: string;
+  cities?: {
+    name: string;
+  };
+  service_types?: {
+    name: string;
+  };
 }
 
 export const useProviderApplications = () => {
@@ -25,15 +31,19 @@ export const useProviderApplications = () => {
     queryKey: ['provider-applications'],
     queryFn: async () => {
       const { data, error } = await supabase
-        .from('provider_applications' as any)
+        .from('provider_applications')
         .select(`
           *,
-          cities(name),
-          service_types(name)
+          cities:city_id(name),
+          service_types:service_type_id(name)
         `)
         .order('created_at', { ascending: false });
 
-      if (error) throw error;
+      if (error) {
+        console.error('Error fetching provider applications:', error);
+        throw error;
+      }
+
       return data as ProviderApplication[];
     },
   });
@@ -41,18 +51,39 @@ export const useProviderApplications = () => {
 
 export const useUpdateApplicationStatus = () => {
   const queryClient = useQueryClient();
-  
+  const { toast } = useToast();
+
   return useMutation({
-    mutationFn: async ({ id, status, admin_notes }: { id: string; status: 'pending' | 'approved' | 'rejected'; admin_notes?: string }) => {
+    mutationFn: async ({ 
+      id, 
+      status, 
+      admin_notes 
+    }: { 
+      id: string; 
+      status: 'approved' | 'rejected'; 
+      admin_notes?: string;
+    }) => {
       const { error } = await supabase
-        .from('provider_applications' as any)
-        .update({ status, admin_notes })
+        .from('provider_applications')
+        .update({ 
+          status, 
+          admin_notes,
+          updated_at: new Date().toISOString()
+        })
         .eq('id', id);
 
       if (error) throw error;
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['provider-applications'] });
+    },
+    onError: (error) => {
+      console.error('Error updating application status:', error);
+      toast({
+        title: 'خطأ',
+        description: 'فشل في تحديث حالة الطلب',
+        variant: 'destructive',
+      });
     },
   });
 };

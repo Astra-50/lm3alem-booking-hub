@@ -44,21 +44,21 @@ const CathedralFooter = () => {
     {
       title: 'الشركة',
       links: [
-        { name: 'من نحن', href: '#' },
-        { name: 'كيف نعمل', href: '#' },
-        { name: 'انضم كمعلم', href: '#' },
-        { name: 'المدونة', href: '#' },
-        { name: 'الأسئلة الشائعة', href: '#' },
+        { name: 'من نحن', href: '/' },
+        { name: 'كيف نعمل', href: '/' },
+        { name: 'انضم كمعلم', href: '/join-provider' },
+        { name: 'المدونة', href: '/' },
+        { name: 'الأسئلة الشائعة', href: '/' },
       ]
     },
     {
       title: 'الدعم',
       links: [
-        { name: 'مركز المساعدة', href: '#' },
-        { name: 'اتصل بنا', href: '#' },
-        { name: 'سياسة الخصوصية', href: '#' },
-        { name: 'شروط الاستخدام', href: '#' },
-        { name: 'ضمان الجودة', href: '#' },
+        { name: 'مركز المساعدة', href: '/' },
+        { name: 'اتصل بنا', href: '/' },
+        { name: 'سياسة الخصوصية', href: '/privacy-policy' },
+        { name: 'شروط الاستخدام', href: '/terms-of-use' },
+        { name: 'ضمان الجودة', href: '/' },
       ]
     }
   ];
@@ -214,13 +214,13 @@ const CathedralFooter = () => {
             </div>
             
             <div className="flex space-x-6 space-x-reverse text-sm">
-              <Link to="#" className="text-gray-400 hover:text-white transition-colors duration-300">
+              <Link to="/privacy-policy" className="text-gray-400 hover:text-white transition-colors duration-300">
                 سياسة الخصوصية
               </Link>
-              <Link to="#" className="text-gray-400 hover:text-white transition-colors duration-300">
+              <Link to="/terms-of-use" className="text-gray-400 hover:text-white transition-colors duration-300">
                 شروط الاستخدام
               </Link>
-              <Link to="#" className="text-gray-400 hover:text-white transition-colors duration-300">
+              <Link to="/cookie-policy" className="text-gray-400 hover:text-white transition-colors duration-300">
                 ملفات تعريف الارتباط
               </Link>
             </div>
