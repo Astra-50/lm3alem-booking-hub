@@ -1,7 +1,7 @@
-
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
+import { providerApplicationSchema, sanitizeString, sanitizePhoneNumber, sanitizeEmail, checkRateLimit } from '@/utils/inputValidation';
 
 export interface ProviderApplication {
   id: string;
@@ -45,6 +45,77 @@ export const useProviderApplications = () => {
       }
 
       return data as ProviderApplication[];
+    },
+  });
+};
+
+export const useCreateProviderApplication = () => {
+  const queryClient = useQueryClient();
+  const { toast } = useToast();
+
+  return useMutation({
+    mutationFn: async (applicationData: any) => {
+      console.log('Starting provider application validation');
+      
+      // Client-side rate limiting check
+      const clientIP = 'browser_' + (window.location.hostname || 'localhost');
+      if (!checkRateLimit(clientIP + '_application', 2, 300000)) { // 2 per 5 minutes
+        throw new Error('معدل الطلبات مرتفع جداً. حاول مرة أخرى خلال 5 دقائق');
+      }
+
+      // Sanitize inputs before validation
+      const sanitizedData = {
+        ...applicationData,
+        full_name: sanitizeString(applicationData.full_name),
+        phone: sanitizePhoneNumber(applicationData.phone),
+        whatsapp: applicationData.whatsapp ? sanitizePhoneNumber(applicationData.whatsapp) : undefined,
+        email: applicationData.email ? sanitizeEmail(applicationData.email) : undefined,
+        experience_description: sanitizeString(applicationData.experience_description),
+      };
+
+      try {
+        // Validate with Zod schema
+        const validatedData = providerApplicationSchema.parse(sanitizedData);
+        console.log('Provider application validation passed');
+        
+        const { data, error } = await supabase
+          .from('provider_applications')
+          .insert([validatedData])
+          .select()
+          .single();
+        
+        if (error) {
+          console.error('Database insertion error:', error);
+          throw error;
+        }
+        
+        console.log('Provider application created successfully:', data);
+        return data;
+        
+      } catch (validationError: any) {
+        console.error('Validation failed:', validationError);
+        if (validationError.errors) {
+          // Zod validation errors
+          const errorMessages = validationError.errors.map((err: any) => err.message);
+          throw new Error(errorMessages.join(', '));
+        }
+        throw validationError;
+      }
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['provider-applications'] });
+      toast({
+        title: 'تم إرسال الطلب بنجاح',
+        description: 'سيتم مراجعة طلبك والرد عليك قريباً',
+      });
+    },
+    onError: (error: any) => {
+      console.error('Provider application mutation failed:', error);
+      toast({
+        title: 'خطأ في إرسال الطلب',
+        description: error.message || 'حدث خطأ غير متوقع',
+        variant: 'destructive',
+      });
     },
   });
 };
