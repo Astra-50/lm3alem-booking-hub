@@ -1,7 +1,7 @@
+
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
-import { providerApplicationSchema, sanitizeString, sanitizePhoneNumber, sanitizeEmail, checkRateLimit } from '@/utils/inputValidation';
 
 export interface ProviderApplication {
   id: string;
@@ -55,52 +55,41 @@ export const useCreateProviderApplication = () => {
 
   return useMutation({
     mutationFn: async (applicationData: any) => {
-      console.log('Starting provider application validation');
+      console.log('Creating provider application:', applicationData);
       
-      // Client-side rate limiting check
-      const clientIP = 'browser_' + (window.location.hostname || 'localhost');
-      if (!checkRateLimit(clientIP + '_application', 2, 300000)) { // 2 per 5 minutes
-        throw new Error('معدل الطلبات مرتفع جداً. حاول مرة أخرى خلال 5 دقائق');
+      // Simple validation - just check required fields
+      if (!applicationData.full_name || !applicationData.phone || !applicationData.city_id || !applicationData.service_type_id) {
+        throw new Error('جميع الحقول المطلوبة يجب أن تكون مملوءة');
       }
 
-      // Sanitize inputs before validation
-      const sanitizedData = {
-        ...applicationData,
-        full_name: sanitizeString(applicationData.full_name),
-        phone: sanitizePhoneNumber(applicationData.phone),
-        whatsapp: applicationData.whatsapp ? sanitizePhoneNumber(applicationData.whatsapp) : undefined,
-        email: applicationData.email ? sanitizeEmail(applicationData.email) : undefined,
-        experience_description: sanitizeString(applicationData.experience_description),
+      // Prepare data for insertion - remove array wrapper and ensure all required fields are present
+      const insertData = {
+        full_name: applicationData.full_name,
+        phone: applicationData.phone,
+        whatsapp: applicationData.whatsapp || null,
+        email: applicationData.email || null,
+        city_id: applicationData.city_id,
+        service_type_id: applicationData.service_type_id,
+        experience_years: parseInt(applicationData.experience_years) || 0,
+        experience_description: applicationData.experience_description,
+        languages: Array.isArray(applicationData.languages) ? applicationData.languages : applicationData.languages.split(',').map((lang: string) => lang.trim()),
       };
-
-      try {
-        // Validate with Zod schema
-        const validatedData = providerApplicationSchema.parse(sanitizedData);
-        console.log('Provider application validation passed');
-        
-        const { data, error } = await supabase
-          .from('provider_applications')
-          .insert([validatedData])
-          .select()
-          .single();
-        
-        if (error) {
-          console.error('Database insertion error:', error);
-          throw error;
-        }
-        
-        console.log('Provider application created successfully:', data);
-        return data;
-        
-      } catch (validationError: any) {
-        console.error('Validation failed:', validationError);
-        if (validationError.errors) {
-          // Zod validation errors
-          const errorMessages = validationError.errors.map((err: any) => err.message);
-          throw new Error(errorMessages.join(', '));
-        }
-        throw validationError;
+      
+      console.log('Insert data prepared:', insertData);
+      
+      const { data, error } = await supabase
+        .from('provider_applications')
+        .insert(insertData)
+        .select()
+        .single();
+      
+      if (error) {
+        console.error('Database insertion error:', error);
+        throw error;
       }
+      
+      console.log('Provider application created successfully:', data);
+      return data;
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['provider-applications'] });
