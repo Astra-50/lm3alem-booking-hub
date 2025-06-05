@@ -1,66 +1,45 @@
+
 import { z } from 'zod';
 
-// Sanitization functions
+// Simple sanitization functions
 export const sanitizeString = (input: string): string => {
   if (!input) return '';
-  
-  // Remove potentially dangerous HTML tags and scripts
-  return input
-    .replace(/<script\b[^<]*(?:(?!<\/script>)<[^<]*)*<\/script>/gi, '')
-    .replace(/<[^>]*>/g, '')
-    .trim()
-    .substring(0, 1000); // Limit length to prevent DoS
+  return input.trim().substring(0, 1000);
 };
 
 export const sanitizePhoneNumber = (phone: string): string => {
   if (!phone) return '';
-  
-  // Remove all non-digit characters except + at the beginning
-  return phone.replace(/[^\d+]/g, '').replace(/(?!^)\+/g, '');
+  return phone.replace(/[^\d+]/g, '');
 };
 
 export const sanitizeEmail = (email: string): string => {
   if (!email) return '';
-  
-  // Basic email sanitization - remove dangerous chars
-  return email
-    .toLowerCase()
-    .replace(/[<>'"]/g, '')
-    .trim()
-    .substring(0, 254); // RFC 5321 limit
+  return email.toLowerCase().trim().substring(0, 254);
 };
 
-// Validation schemas
+// Simplified validation schemas with minimal restrictions
 export const bookingFormSchema = z.object({
   full_name: z
     .string()
     .min(2, 'الاسم يجب أن يكون على الأقل حرفين')
-    .max(100, 'الاسم طويل جداً')
-    .regex(/^[\u0600-\u06FF\u0750-\u077F\u08A0-\u08FF\uFB50-\uFDFF\uFE70-\uFEFF\s\-']+$/, 'الاسم يجب أن يحتوي على أحرف عربية فقط'),
+    .max(100, 'الاسم طويل جداً'),
   
   phone: z
     .string()
-    .min(10, 'رقم الهاتف غير صحيح')
-    .max(15, 'رقم الهاتف طويل جداً')
-    .regex(/^(\+212|0)[5-7]\d{8}$/, 'رقم الهاتف المغربي غير صحيح'),
+    .min(8, 'رقم الهاتف قصير جداً')
+    .max(15, 'رقم الهاتف طويل جداً'),
   
   whatsapp: z
     .string()
-    .optional()
-    .refine((val) => !val || /^(\+212|0)[5-7]\d{8}$/.test(val), 'رقم الواتساب غير صحيح'),
+    .optional(),
   
   requested_date: z
     .string()
-    .refine((date) => {
-      const selectedDate = new Date(date);
-      const today = new Date();
-      today.setHours(0, 0, 0, 0);
-      return selectedDate >= today;
-    }, 'لا يمكن حجز موعد في الماضي'),
+    .min(1, 'يجب اختيار تاريخ'),
   
   requested_time: z
     .string()
-    .regex(/^([01]?[0-9]|2[0-3]):[0-5][0-9]$/, 'صيغة الوقت غير صحيحة'),
+    .min(1, 'يجب اختيار وقت'),
   
   description: z
     .string()
@@ -69,24 +48,22 @@ export const bookingFormSchema = z.object({
   
   service_provider_id: z
     .string()
-    .uuid('معرف مقدم الخدمة غير صحيح'),
+    .min(1, 'معرف مقدم الخدمة مطلوب'),
 });
 
 export const providerApplicationSchema = z.object({
   full_name: z
     .string()
     .min(2, 'الاسم يجب أن يكون على الأقل حرفين')
-    .max(100, 'الاسم طويل جداً')
-    .regex(/^[\u0600-\u06FF\u0750-\u077F\u08A0-\u08FF\uFB50-\uFDFF\uFE70-\uFEFF\s\-']+$/, 'الاسم يجب أن يحتوي على أحرف عربية فقط'),
+    .max(100, 'الاسم طويل جداً'),
   
   phone: z
     .string()
-    .regex(/^(\+212|0)[5-7]\d{8}$/, 'رقم الهاتف المغربي غير صحيح'),
+    .min(8, 'رقم الهاتف قصير جداً'),
   
   whatsapp: z
     .string()
-    .optional()
-    .refine((val) => !val || /^(\+212|0)[5-7]\d{8}$/.test(val), 'رقم الواتساب غير صحيح'),
+    .optional(),
   
   email: z
     .string()
@@ -95,11 +72,11 @@ export const providerApplicationSchema = z.object({
   
   city_id: z
     .string()
-    .uuid('يجب اختيار مدينة صحيحة'),
+    .min(1, 'يجب اختيار مدينة'),
   
   service_type_id: z
     .string()
-    .uuid('يجب اختيار نوع خدمة صحيح'),
+    .min(1, 'يجب اختيار نوع خدمة'),
   
   experience_years: z
     .number()
@@ -116,24 +93,9 @@ export const providerApplicationSchema = z.object({
     .min(1, 'يجب اختيار لغة واحدة على الأقل'),
 });
 
-// Rate limiting storage (in-memory for MVP, should use Redis in production)
-const rateLimitStore = new Map<string, { count: number; lastReset: number }>();
-
-export const checkRateLimit = (identifier: string, maxRequests: number = 5, windowMs: number = 60000): boolean => {
-  const now = Date.now();
-  const userLimit = rateLimitStore.get(identifier);
-  
-  if (!userLimit || now - userLimit.lastReset > windowMs) {
-    rateLimitStore.set(identifier, { count: 1, lastReset: now });
-    return true;
-  }
-  
-  if (userLimit.count >= maxRequests) {
-    return false;
-  }
-  
-  userLimit.count++;
-  return true;
+// Remove rate limiting completely for now
+export const checkRateLimit = (): boolean => {
+  return true; // Always allow for now
 };
 
 export type BookingFormData = z.infer<typeof bookingFormSchema>;

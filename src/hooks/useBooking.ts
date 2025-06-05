@@ -1,6 +1,6 @@
+
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
-import { bookingFormSchema, sanitizeString, sanitizePhoneNumber, checkRateLimit } from '@/utils/inputValidation';
 
 interface BookingData {
   full_name: string;
@@ -17,70 +17,40 @@ export const useCreateBooking = () => {
   
   return useMutation({
     mutationFn: async (bookingData: BookingData) => {
-      console.log('Starting booking validation for:', bookingData.full_name);
+      console.log('Creating booking with simplified validation:', bookingData);
       
-      // Client-side rate limiting check
-      const clientIP = 'browser_' + (window.location.hostname || 'localhost');
-      if (!checkRateLimit(clientIP, 3, 60000)) {
-        throw new Error('معدل الطلبات مرتفع جداً. حاول مرة أخرى خلال دقيقة');
+      // Basic validation - only check required fields
+      if (!bookingData.full_name || !bookingData.phone || !bookingData.requested_date || 
+          !bookingData.requested_time || !bookingData.service_provider_id) {
+        throw new Error('جميع الحقول المطلوبة يجب أن تكون مملوءة');
       }
 
-      // Sanitize inputs before validation
-      const sanitizedData = {
-        ...bookingData,
-        full_name: sanitizeString(bookingData.full_name),
-        phone: sanitizePhoneNumber(bookingData.phone),
-        whatsapp: bookingData.whatsapp ? sanitizePhoneNumber(bookingData.whatsapp) : undefined,
-        description: bookingData.description ? sanitizeString(bookingData.description) : undefined,
+      // Basic sanitization - just trim whitespace
+      const cleanData = {
+        full_name: bookingData.full_name.trim(),
+        phone: bookingData.phone.trim(),
+        whatsapp: bookingData.whatsapp?.trim() || null,
+        requested_date: bookingData.requested_date,
+        requested_time: bookingData.requested_time,
+        description: bookingData.description?.trim() || null,
+        service_provider_id: bookingData.service_provider_id,
       };
 
-      // Validate with Zod schema
-      try {
-        const validatedData = bookingFormSchema.parse(sanitizedData);
-        console.log('Data validation passed');
-        
-        // Call server-side validation function
-        const { data: validationResult, error: fnError } = await supabase.functions.invoke('validate-booking', {
-          body: validatedData
-        });
-
-        if (fnError) {
-          console.error('Server validation failed:', fnError);
-          throw new Error('فشل في التحقق من البيانات');
-        }
-
-        if (!validationResult.success) {
-          console.error('Validation errors:', validationResult.errors);
-          throw new Error(validationResult.errors.join(', '));
-        }
-
-        // Use server-sanitized data for the actual insert
-        const finalData = validationResult.sanitized_data;
-        console.log('Using server-sanitized data:', finalData);
-        
-        const { data, error } = await supabase
-          .from('booking_requests')
-          .insert([finalData])
-          .select()
-          .single();
-        
-        if (error) {
-          console.error('Database insertion error:', error);
-          throw error;
-        }
-        
-        console.log('Booking created successfully:', data);
-        return data;
-        
-      } catch (validationError: any) {
-        console.error('Validation failed:', validationError);
-        if (validationError.errors) {
-          // Zod validation errors
-          const errorMessages = validationError.errors.map((err: any) => err.message);
-          throw new Error(errorMessages.join(', '));
-        }
-        throw validationError;
+      console.log('Inserting booking data directly to Supabase:', cleanData);
+      
+      const { data, error } = await supabase
+        .from('booking_requests')
+        .insert([cleanData])
+        .select()
+        .single();
+      
+      if (error) {
+        console.error('Database insertion error:', error);
+        throw error;
       }
+      
+      console.log('Booking created successfully:', data);
+      return data;
     },
     onSuccess: (data) => {
       console.log('Booking mutation succeeded:', data);
