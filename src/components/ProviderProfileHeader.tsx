@@ -4,6 +4,7 @@ import { Link } from 'react-router-dom';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Star, MapPin, Phone, MessageCircle } from 'lucide-react';
+import PhoneDisplay from '@/components/PhoneDisplay';
 
 interface ProviderProfileHeaderProps {
   provider: {
@@ -20,13 +21,6 @@ interface ProviderProfileHeaderProps {
 }
 
 const ProviderProfileHeader = ({ provider }: ProviderProfileHeaderProps) => {
-  const formatPhoneNumber = (phone: string) => {
-    if (phone.startsWith('0')) {
-      return phone.replace(/(\d{4})(\d{2})(\d{2})(\d{2})/, '$1 $2 $3 $4');
-    }
-    return phone;
-  };
-
   return (
     <div className="relative bg-gradient-to-r from-primary/10 to-accent/10 p-8 border-b">
       <div className="flex flex-col md:flex-row items-start md:items-center space-y-6 md:space-y-0 md:space-x-8 md:space-x-reverse">
@@ -87,9 +81,9 @@ const ProviderProfileHeader = ({ provider }: ProviderProfileHeaderProps) => {
               </Link>
               
               <a href={`tel:${provider.phone}`}>
-                <Button variant="outline" size="lg">
-                  <Phone className="w-4 h-4 mr-2" />
-                  {formatPhoneNumber(provider.phone)}
+                <Button variant="outline" size="lg" className="flex items-center gap-2">
+                  <Phone className="w-4 h-4" />
+                  <PhoneDisplay phone={provider.phone} />
                 </Button>
               </a>
               
@@ -99,8 +93,8 @@ const ProviderProfileHeader = ({ provider }: ProviderProfileHeaderProps) => {
                   target="_blank"
                   rel="noopener noreferrer"
                 >
-                  <Button size="lg" className="bg-green-600 hover:bg-green-700 text-white">
-                    <MessageCircle className="w-4 h-4 mr-2" />
+                  <Button size="lg" className="bg-green-600 hover:bg-green-700 text-white flex items-center gap-2">
+                    <MessageCircle className="w-4 h-4" />
                     واتساب
                   </Button>
                 </a>

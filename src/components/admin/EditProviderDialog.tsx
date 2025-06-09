@@ -105,7 +105,7 @@ const EditProviderDialog = ({ provider }: EditProviderDialogProps) => {
                   <FormItem>
                     <FormLabel>رقم الهاتف</FormLabel>
                     <FormControl>
-                      <Input {...field} />
+                      <Input {...field} className="text-left font-mono" dir="ltr" />
                     </FormControl>
                     <FormMessage />
                   </FormItem>
@@ -119,7 +119,7 @@ const EditProviderDialog = ({ provider }: EditProviderDialogProps) => {
                   <FormItem>
                     <FormLabel>واتساب (اختياري)</FormLabel>
                     <FormControl>
-                      <Input {...field} />
+                      <Input {...field} className="text-left font-mono" dir="ltr" />
                     </FormControl>
                     <FormMessage />
                   </FormItem>

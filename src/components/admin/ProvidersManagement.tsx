@@ -8,6 +8,7 @@ import { useAdminProviders, useUpdateProviderVerification, useUpdateProviderStat
 import AddProviderForm from '@/components/AddProviderForm';
 import EditProviderDialog from './EditProviderDialog';
 import DeleteProviderDialog from './DeleteProviderDialog';
+import PhoneDisplay from '@/components/PhoneDisplay';
 import { Search, Eye, EyeOff } from 'lucide-react';
 
 const ProvidersManagement = () => {
@@ -119,7 +120,9 @@ const ProvidersManagement = () => {
                         {provider.neighborhoods.name}
                       </p>
                     )}
-                    <p className="text-sm text-gray-500">{provider.phone}</p>
+                    <div className="text-sm text-gray-500">
+                      <PhoneDisplay phone={provider.phone} className="text-sm" />
+                    </div>
                   </div>
                   
                   {provider.profile_image_url && (

@@ -10,7 +10,7 @@ interface PhoneDisplayProps {
 
 const PhoneDisplay = ({ phone, className }: PhoneDisplayProps) => {
   return (
-    <span className={cn(phoneNumberClasses, className)}>
+    <span className={cn(phoneNumberClasses, "text-left", className)} dir="ltr">
       {formatPhoneNumber(phone)}
     </span>
   );

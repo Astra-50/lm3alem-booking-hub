@@ -44,7 +44,8 @@ const PersonalInfoFields = ({ fullName, phone, whatsapp, onChange, disabled }: P
           value={phone}
           onChange={(e) => onChange('phone', e.target.value)}
           placeholder="0612345678"
-          className="text-right h-12 border-blue-200 focus:border-blue-400 focus:ring-blue-400/50"
+          className="text-left h-12 border-blue-200 focus:border-blue-400 focus:ring-blue-400/50 font-mono"
+          dir="ltr"
           required
           disabled={disabled}
         />
@@ -62,7 +63,8 @@ const PersonalInfoFields = ({ fullName, phone, whatsapp, onChange, disabled }: P
           value={whatsapp}
           onChange={(e) => onChange('whatsapp', e.target.value)}
           placeholder="0612345678"
-          className="text-right h-12 border-blue-200 focus:border-blue-400 focus:ring-blue-400/50"
+          className="text-left h-12 border-blue-200 focus:border-blue-400 focus:ring-blue-400/50 font-mono"
+          dir="ltr"
           disabled={disabled}
         />
       </div>

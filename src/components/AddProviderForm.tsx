@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -337,8 +336,8 @@ const AddProviderForm = () => {
                     value={formData.phone}
                     onChange={(e) => setFormData({ ...formData, phone: e.target.value })}
                     placeholder="0123456789"
-                    className="text-right"
-                    dir="rtl"
+                    className="text-left font-mono"
+                    dir="ltr"
                     required
                   />
                 </div>
@@ -348,8 +347,8 @@ const AddProviderForm = () => {
                     value={formData.whatsapp}
                     onChange={(e) => setFormData({ ...formData, whatsapp: e.target.value })}
                     placeholder="0123456789"
-                    className="text-right"
-                    dir="rtl"
+                    className="text-left font-mono"
+                    dir="ltr"
                   />
                 </div>
               </div>

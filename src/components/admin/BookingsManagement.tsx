@@ -5,6 +5,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { useAdminBookings } from '@/hooks/useAdminData';
 import BookingStatusDialog from './BookingStatusDialog';
+import PhoneDisplay from '@/components/PhoneDisplay';
 
 const BookingsManagement = () => {
   const { data: bookings, isLoading: bookingsLoading } = useAdminBookings();
@@ -44,8 +45,9 @@ const BookingsManagement = () => {
                     <p className="text-sm text-gray-600">
                       {booking.service_providers?.service_types?.name} مع {booking.service_providers?.name}
                     </p>
-                    <p className="text-sm text-gray-500">
-                      {booking.requested_date} - {booking.phone}
+                    <p className="text-sm text-gray-500 flex items-center gap-2">
+                      <span>{booking.requested_date} -</span>
+                      <PhoneDisplay phone={booking.phone} className="text-sm" />
                     </p>
                     {booking.description && (
                       <p className="text-xs text-gray-400 mt-1">
