@@ -4,28 +4,12 @@ import { useParams, Link } from 'react-router-dom';
 import Layout from '@/components/Layout';
 import ProviderProfileHeader from '@/components/ProviderProfileHeader';
 import { Button } from '@/components/ui/button';
-import { Badge } from '@/components/ui/badge';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Phone, MessageCircle, Globe, Clock, Award } from 'lucide-react';
 import { useProvider } from '@/hooks/useProviders';
-import WorkingHoursCard from '@/components/WorkingHoursCard';
-import PhoneDisplay from '@/components/PhoneDisplay';
-
-interface WorkingHour {
-  available: boolean;
-  start: string;
-  end: string;
-}
-
-interface WorkingHours {
-  monday: WorkingHour;
-  tuesday: WorkingHour;
-  wednesday: WorkingHour;
-  thursday: WorkingHour;
-  friday: WorkingHour;
-  saturday: WorkingHour;
-  sunday: WorkingHour;
-}
+import ProviderAboutSection from '@/components/profile/ProviderAboutSection';
+import ProviderWorkingHoursSection from '@/components/profile/ProviderWorkingHoursSection';
+import ProviderLanguagesCard from '@/components/profile/ProviderLanguagesCard';
+import ProviderContactCard from '@/components/profile/ProviderContactCard';
+import ProviderBookingCTA from '@/components/profile/ProviderBookingCTA';
 
 const ProviderProfile = () => {
   const { id } = useParams<{ id: string }>();
@@ -83,114 +67,24 @@ const ProviderProfile = () => {
               {/* Main Content */}
               <div className="lg:col-span-2 space-y-4 md:space-y-6">
                 {/* About Section */}
-                {provider.experience_description && (
-                  <Card className="border-0 shadow-md">
-                    <CardHeader className="pb-3 md:pb-6">
-                      <CardTitle className="flex items-center space-x-2 space-x-reverse text-lg md:text-xl">
-                        <Award className="w-4 h-4 md:w-5 md:h-5 text-primary" />
-                        <span>نبذة عن المعلم</span>
-                      </CardTitle>
-                    </CardHeader>
-                    <CardContent>
-                      <p className="text-gray-700 leading-relaxed text-base md:text-lg">
-                        {provider.experience_description}
-                      </p>
-                    </CardContent>
-                  </Card>
-                )}
+                <ProviderAboutSection experienceDescription={provider.experience_description} />
 
                 {/* Working Hours */}
-                {provider.working_hours && typeof provider.working_hours === 'object' && !Array.isArray(provider.working_hours) && (
-                  <Card className="border-0 shadow-md">
-                    <CardHeader className="pb-3 md:pb-6">
-                      <CardTitle className="flex items-center space-x-2 space-x-reverse text-lg md:text-xl">
-                        <Clock className="w-4 h-4 md:w-5 md:h-5 text-primary" />
-                        <span>أوقات العمل</span>
-                      </CardTitle>
-                    </CardHeader>
-                    <CardContent>
-                      <WorkingHoursCard workingHours={provider.working_hours as unknown as WorkingHours} />
-                    </CardContent>
-                  </Card>
-                )}
+                <ProviderWorkingHoursSection workingHours={provider.working_hours} />
               </div>
 
               {/* Sidebar */}
               <div className="space-y-4 md:space-y-6">
                 {/* Languages */}
-                <Card className="border-0 shadow-md">
-                  <CardHeader className="pb-3 md:pb-6">
-                    <CardTitle className="flex items-center space-x-2 space-x-reverse text-lg md:text-xl">
-                      <Globe className="w-4 h-4 md:w-5 md:h-5 text-primary" />
-                      <span>اللغات</span>
-                    </CardTitle>
-                  </CardHeader>
-                  <CardContent>
-                    <div className="flex flex-wrap gap-2">
-                      {provider.languages?.map((language, index) => (
-                        <Badge key={index} variant="outline" className="bg-blue-50 text-blue-700 border-blue-200 text-sm">
-                          {language}
-                        </Badge>
-                      ))}
-                    </div>
-                  </CardContent>
-                </Card>
+                <ProviderLanguagesCard languages={provider.languages} />
                 
                 {/* Contact Info */}
-                <Card className="border-0 shadow-md">
-                  <CardHeader className="pb-3 md:pb-6">
-                    <CardTitle className="flex items-center space-x-2 space-x-reverse text-lg md:text-xl">
-                      <Phone className="w-4 h-4 md:w-5 md:h-5 text-primary" />
-                      <span>معلومات التواصل</span>
-                    </CardTitle>
-                  </CardHeader>
-                  <CardContent className="space-y-3 md:space-y-4">
-                    <div className="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
-                      <div className="flex items-center space-x-3 space-x-reverse">
-                        <Phone className="w-4 h-4 text-gray-500" />
-                        <PhoneDisplay phone={provider.phone} />
-                      </div>
-                      <a href={`tel:${provider.phone}`}>
-                        <Button size="sm" variant="outline" className="text-xs md:text-sm">
-                          اتصال
-                        </Button>
-                      </a>
-                    </div>
-                    
-                    {provider.whatsapp && (
-                      <div className="flex items-center justify-between p-3 bg-green-50 rounded-lg">
-                        <div className="flex items-center space-x-3 space-x-reverse">
-                          <MessageCircle className="w-4 h-4 text-green-600" />
-                          <PhoneDisplay phone={provider.whatsapp} />
-                        </div>
-                        <a
-                          href={`https://wa.me/${provider.whatsapp.replace(/\D/g, '')}`}
-                          target="_blank"
-                          rel="noopener noreferrer"
-                        >
-                          <Button size="sm" className="bg-green-600 hover:bg-green-700 text-white text-xs md:text-sm">
-                            واتساب
-                          </Button>
-                        </a>
-                      </div>
-                    )}
-                  </CardContent>
-                </Card>
+                <ProviderContactCard phone={provider.phone} whatsapp={provider.whatsapp} />
               </div>
             </div>
             
             {/* CTA Section */}
-            <div className="bg-gradient-to-r from-primary/10 to-accent/10 p-4 md:p-8 text-center border-t">
-              <h3 className="text-2xl md:text-3xl font-bold mb-3 md:mb-4 text-gray-900">جاهز للحجز؟</h3>
-              <p className="text-gray-700 mb-4 md:mb-6 text-base md:text-lg">
-                احجز الآن واحصل على خدمة عالية الجودة من {provider.name}
-              </p>
-              <Link to={`/booking/${provider.id}`}>
-                <Button size="lg" className="bg-primary hover:bg-primary/90 px-6 md:px-8 py-2 md:py-3 text-base md:text-lg w-full md:w-auto">
-                  احجز الآن
-                </Button>
-              </Link>
-            </div>
+            <ProviderBookingCTA providerId={provider.id} providerName={provider.name} />
           </div>
         </div>
       </div>
