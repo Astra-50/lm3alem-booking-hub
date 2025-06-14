@@ -18,17 +18,17 @@ const ProviderProfile = () => {
   if (isLoading) {
     return (
       <Layout>
-        <div className="py-4 md:py-8">
-          <div className="max-w-4xl mx-auto">
-            <div className="bg-white rounded-xl shadow-lg overflow-hidden animate-pulse">
+        <div className="py-2 md:py-4 lg:py-8">
+          <div className="max-w-4xl mx-auto px-4">
+            <div className="bg-white rounded-lg md:rounded-xl shadow-md md:shadow-lg overflow-hidden animate-pulse">
               <div className="p-4 md:p-8 border-b">
-                <div className="flex flex-col md:flex-row items-start md:items-center space-y-4 md:space-y-0 md:space-x-6 md:space-x-reverse">
-                  <div className="w-24 h-24 md:w-32 md:h-32 bg-gray-200 rounded-full mx-auto md:mx-0"></div>
+                <div className="flex flex-col md:flex-row items-center md:items-start space-y-4 md:space-y-0 md:space-x-6 md:space-x-reverse">
+                  <div className="w-20 h-20 md:w-32 md:h-32 bg-gray-200 rounded-full"></div>
                   <div className="flex-1 text-center md:text-right">
                     <div className="h-6 md:h-8 bg-gray-200 rounded mb-2 w-48 mx-auto md:mx-0"></div>
                     <div className="h-4 md:h-6 bg-gray-200 rounded mb-2 w-32 mx-auto md:mx-0"></div>
                     <div className="h-3 md:h-4 bg-gray-200 rounded mb-4 w-24 mx-auto md:mx-0"></div>
-                    <div className="h-8 md:h-10 bg-gray-200 rounded w-32 mx-auto md:mx-0"></div>
+                    <div className="h-8 md:h-10 bg-gray-200 rounded w-full md:w-32"></div>
                   </div>
                 </div>
               </div>
@@ -56,16 +56,16 @@ const ProviderProfile = () => {
 
   return (
     <Layout>
-      <div className="py-4 md:py-8">
-        <div className="max-w-5xl mx-auto px-4">
-          <div className="bg-white rounded-xl md:rounded-2xl shadow-lg md:shadow-xl overflow-hidden">
+      <div className="py-2 md:py-4 lg:py-8">
+        <div className="max-w-5xl mx-auto px-2 md:px-4">
+          <div className="bg-white rounded-lg md:rounded-xl lg:rounded-2xl shadow-md md:shadow-lg lg:shadow-xl overflow-hidden">
             {/* Enhanced Header */}
             <ProviderProfileHeader provider={provider} />
             
             {/* Details Grid */}
-            <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 md:gap-8 p-4 md:p-8">
+            <div className="grid grid-cols-1 lg:grid-cols-3 gap-3 md:gap-4 lg:gap-8 p-3 md:p-4 lg:p-8">
               {/* Main Content */}
-              <div className="lg:col-span-2 space-y-4 md:space-y-6">
+              <div className="lg:col-span-2 space-y-3 md:space-y-4 lg:space-y-6">
                 {/* About Section */}
                 <ProviderAboutSection experienceDescription={provider.experience_description} />
 
@@ -74,7 +74,7 @@ const ProviderProfile = () => {
               </div>
 
               {/* Sidebar */}
-              <div className="space-y-4 md:space-y-6">
+              <div className="space-y-3 md:space-y-4 lg:space-y-6">
                 {/* Languages */}
                 <ProviderLanguagesCard languages={provider.languages} />
                 

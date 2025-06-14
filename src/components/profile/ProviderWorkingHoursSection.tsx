@@ -31,13 +31,13 @@ const ProviderWorkingHoursSection = ({ workingHours }: ProviderWorkingHoursSecti
 
   return (
     <Card className="border-0 shadow-md">
-      <CardHeader className="pb-3 md:pb-6">
-        <CardTitle className="flex items-center space-x-2 space-x-reverse text-lg md:text-xl">
-          <Clock className="w-4 h-4 md:w-5 md:h-5 text-primary" />
+      <CardHeader className="pb-2 md:pb-4 px-4 md:px-6 pt-4 md:pt-6">
+        <CardTitle className="flex items-center space-x-2 space-x-reverse text-base md:text-lg">
+          <Clock className="w-4 h-4 text-primary flex-shrink-0" />
           <span>أوقات العمل</span>
         </CardTitle>
       </CardHeader>
-      <CardContent>
+      <CardContent className="px-4 md:px-6 pb-4 md:pb-6">
         <WorkingHoursCard workingHours={workingHours as unknown as WorkingHours} />
       </CardContent>
     </Card>
