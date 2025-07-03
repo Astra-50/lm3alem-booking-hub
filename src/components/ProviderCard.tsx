@@ -5,6 +5,10 @@ import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Phone, MessageCircle, MapPin, Clock, Star } from 'lucide-react';
+import StarRating from './reviews/StarRating';
+import ProviderTrustBadges from './trust/ProviderTrustBadges';
+import SocialProofIndicators from './trust/SocialProofIndicators';
+import { useProviderStats } from '@/hooks/useReviews';
 
 interface ProviderCardProps {
   id: string;
@@ -28,13 +32,14 @@ const ProviderCard = ({
   city, 
   neighborhood, 
   isVerified, 
-  isAvailableToday,
-  image,
-  phone,
-  whatsapp,
-  languages,
-  experienceDescription
+  isAvailableToday, 
+  image, 
+  phone, 
+  whatsapp, 
+  languages, 
+  experienceDescription 
 }: ProviderCardProps) => {
+  const { data: stats } = useProviderStats(id);
   return (
     <Card className="hover:shadow-xl transition-all duration-300 animate-fade-in border-0 shadow-md hover:scale-[1.02] bg-gradient-to-br from-white to-gray-50/50">
       <CardContent className="p-0">
@@ -65,12 +70,26 @@ const ProviderCard = ({
                   <h3 className="text-xl font-bold text-gray-900 truncate mb-1">
                     {name}
                   </h3>
-                  <div className="flex items-center space-x-2 space-x-reverse mb-2">
-                    {isVerified && (
-                      <Badge variant="secondary" className="bg-accent text-accent-foreground text-xs">
-                        ✅ موثّق
-                      </Badge>
-                    )}
+                  {/* Rating Display */}
+                  {stats?.average_rating && stats.total_reviews > 0 && (
+                    <div className="flex items-center mb-2">
+                      <StarRating 
+                        rating={stats.average_rating} 
+                        size="sm" 
+                        showNumber={true}
+                      />
+                      <span className="text-xs text-gray-500 mr-1">
+                        ({stats.total_reviews})
+                      </span>
+                    </div>
+                  )}
+                  
+                  <div className="flex flex-wrap gap-1.5 mb-2">
+                    <ProviderTrustBadges 
+                      isVerified={isVerified} 
+                      stats={stats} 
+                      size="sm" 
+                    />
                     {isAvailableToday && (
                       <Badge variant="outline" className="text-green-600 border-green-600 text-xs">
                         <Clock className="w-3 h-3 mr-1" />
@@ -86,6 +105,9 @@ const ProviderCard = ({
                 <MapPin className="w-4 h-4 ml-1 text-gray-400" />
                 <span>{city} - {neighborhood}</span>
               </div>
+              
+              {/* Social Proof */}
+              <SocialProofIndicators stats={stats} size="sm" />
               
               {/* Languages */}
               {languages && languages.length > 0 && (

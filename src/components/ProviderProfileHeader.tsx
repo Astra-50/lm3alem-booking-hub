@@ -5,6 +5,10 @@ import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Star, MapPin, Phone, MessageCircle } from 'lucide-react';
 import PhoneDisplay from '@/components/PhoneDisplay';
+import StarRating from './reviews/StarRating';
+import ProviderTrustBadges from './trust/ProviderTrustBadges';
+import SocialProofIndicators from './trust/SocialProofIndicators';
+import { useProviderStats } from '@/hooks/useReviews';
 
 interface ProviderProfileHeaderProps {
   provider: {
@@ -21,6 +25,7 @@ interface ProviderProfileHeaderProps {
 }
 
 const ProviderProfileHeader = ({ provider }: ProviderProfileHeaderProps) => {
+  const { data: stats } = useProviderStats(provider.id);
   return (
     <div className="relative bg-gradient-to-r from-primary/10 to-accent/10 p-4 md:p-8 border-b">
       <div className="flex flex-col md:flex-row items-center md:items-start space-y-4 md:space-y-0 md:space-x-8 md:space-x-reverse">

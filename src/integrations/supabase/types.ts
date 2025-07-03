@@ -223,6 +223,104 @@ export type Database = {
           },
         ]
       }
+      provider_stats: {
+        Row: {
+          average_rating: number | null
+          completed_bookings: number
+          created_at: string
+          id: string
+          last_booking_at: string | null
+          service_provider_id: string
+          total_bookings: number
+          total_reviews: number
+          updated_at: string
+        }
+        Insert: {
+          average_rating?: number | null
+          completed_bookings?: number
+          created_at?: string
+          id?: string
+          last_booking_at?: string | null
+          service_provider_id: string
+          total_bookings?: number
+          total_reviews?: number
+          updated_at?: string
+        }
+        Update: {
+          average_rating?: number | null
+          completed_bookings?: number
+          created_at?: string
+          id?: string
+          last_booking_at?: string | null
+          service_provider_id?: string
+          total_bookings?: number
+          total_reviews?: number
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "provider_stats_service_provider_id_fkey"
+            columns: ["service_provider_id"]
+            isOneToOne: true
+            referencedRelation: "service_providers"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      reviews: {
+        Row: {
+          booking_request_id: string
+          created_at: string
+          customer_name: string
+          id: string
+          is_approved: boolean
+          is_verified: boolean
+          rating: number
+          review_text: string | null
+          service_provider_id: string
+          updated_at: string
+        }
+        Insert: {
+          booking_request_id: string
+          created_at?: string
+          customer_name: string
+          id?: string
+          is_approved?: boolean
+          is_verified?: boolean
+          rating: number
+          review_text?: string | null
+          service_provider_id: string
+          updated_at?: string
+        }
+        Update: {
+          booking_request_id?: string
+          created_at?: string
+          customer_name?: string
+          id?: string
+          is_approved?: boolean
+          is_verified?: boolean
+          rating?: number
+          review_text?: string | null
+          service_provider_id?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "reviews_booking_request_id_fkey"
+            columns: ["booking_request_id"]
+            isOneToOne: false
+            referencedRelation: "booking_requests"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "reviews_service_provider_id_fkey"
+            columns: ["service_provider_id"]
+            isOneToOne: false
+            referencedRelation: "service_providers"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       service_providers: {
         Row: {
           city_id: string

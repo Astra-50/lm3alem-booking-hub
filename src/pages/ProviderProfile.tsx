@@ -10,6 +10,7 @@ import ProviderWorkingHoursSection from '@/components/profile/ProviderWorkingHou
 import ProviderLanguagesCard from '@/components/profile/ProviderLanguagesCard';
 import ProviderContactCard from '@/components/profile/ProviderContactCard';
 import ProviderBookingCTA from '@/components/profile/ProviderBookingCTA';
+import ProviderReviewsSection from '@/components/reviews/ProviderReviewsSection';
 
 const ProviderProfile = () => {
   const { id } = useParams<{ id: string }>();
@@ -71,6 +72,12 @@ const ProviderProfile = () => {
 
                 {/* Working Hours */}
                 <ProviderWorkingHoursSection workingHours={provider.working_hours} />
+
+                {/* Reviews Section */}
+                <ProviderReviewsSection 
+                  providerId={provider.id} 
+                  providerName={provider.name} 
+                />
               </div>
 
               {/* Sidebar */}
